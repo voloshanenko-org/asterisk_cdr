@@ -213,7 +213,10 @@ function updateTable(important_records, all_records){
         columns: columns,
         rowStyle: rowStyle,
         pageSize: 25,
-        rowAttributes: rowAttributes
+        rowAttributes: rowAttributes,
+        exportDataType: "all",
+        exportTypes: ['xlsx', 'pdf'],
+        exportOptions:  {escape: true}
      });
 
     $('#all-records-table').on('all.bs.table', function (e) {
@@ -227,7 +230,10 @@ function updateTable(important_records, all_records){
         columns: columns,
         rowStyle: rowStyle,
         pageSize: 25,
-        rowAttributes: rowAttributes
+        rowAttributes: rowAttributes,
+        exportDataType: "all",
+        exportTypes: ['xlsx', 'pdf'],
+        exportOptions:  {escape: true}
     });
 
     $('#important-records-table').on('all.bs.table', function (e) {

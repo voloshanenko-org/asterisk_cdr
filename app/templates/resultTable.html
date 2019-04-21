@@ -104,25 +104,22 @@
 
         <div class="tab-content" id="myTabContent">
             <div class="tab-pane fade show active" id="important-records" role="tabpanel" aria-labelledby="important-records-tab">
-                <div id="important-records-toolbar"></div>
-                <div class="row">
-                    <div class="col-md-12">
-                        <div class="form-check">
-                            <input class="form-check-input" onclick="LoadCallsData();" type="checkbox" value="" id="hide_outgoing_missed_check">
-                            <label class="form-check-label" for="hide_outgoing_missed_check">
-                                Hide Outgoing call
-                            </label>
-                        </div>
-                    </div>
+
+                <div class="toolbar form-inline" id="important-records-toolbar">
+                    <input class="form-check-input" onclick="LoadCallsData();" type="checkbox" value="" id="hide_outgoing_missed_check">
+                    <label class="form-check-label" for="hide_outgoing_missed_check">
+                        Hide Outgoing call
+                    </label>
                 </div>
-                    <table
+                <table
                         id="important-records-table"
                         data-toggle="true"
                         data-toolbar="#important-records-toolbar"
                         data-search="true"
                         data-show-columns="true"
                         data-pagination="true"
-                        data-show-fullscreen="true">
+                        data-show-fullscreen="true"
+                        data-show-export="true">
                 </table>
             </div>
             <div class="tab-pane fade" id="all-records" role="tabpanel" aria-labelledby="all-records-tab">
@@ -134,7 +131,8 @@
                         data-search="true"
                         data-show-columns="true"
                         data-pagination="true"
-                        data-show-fullscreen="true">
+                        data-show-fullscreen="true"
+                        data-show-export="true">
                 </table>
             </div>
         </div>

@@ -6,6 +6,7 @@ __pycache__/
 *.iml
 .idea
 db/
+env.prod
 
 # C extensions
 *.so

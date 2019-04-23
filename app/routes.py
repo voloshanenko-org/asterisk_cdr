@@ -1,14 +1,28 @@
 from app import parser
 import json
-from flask import render_template, request, Response
+import os
+from flask import render_template, request, Response, url_for
 from sqlalchemy import exc
-
 from app import app
 
 @app.route('/')
 @app.route('/index')
 def index():
     return render_template('resultTable.html')
+
+
+@app.context_processor
+def override_url_for():
+    return dict(url_for=dated_url_for)
+
+def dated_url_for(endpoint, **values):
+    if endpoint == 'static':
+        filename = values.get('filename', None)
+        if filename is not None:
+            path = os.path.join(app.root_path, endpoint, filename)
+            values['ts'] = int(os.stat(path).st_mtime)
+    return url_for(endpoint, **values)
+
 
 @app.route('/_raw_data/', methods=['GET'])
 def getcalls_finish():

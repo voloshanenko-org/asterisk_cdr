@@ -2,116 +2,123 @@
 {% block body %}
 <div class="container" style="padding: 10px; ">
 
+    <!-- Quick links -->
     <h1></h1>
     <br/>
-        <div class="row">
-            <div class="col-md-3">
-                <h4>Quick Filters</h4>
-            </div>
-            <div class="col-md-9">
-                <a href="#" class="badge badge-success" onclick="setToday();">Today</a>
-                <a href="#" class="badge badge-secondary" onclick="setYesterday();">Yesterday</a>
-                <a href="#" class="badge badge-info" onclick="setCurrentWeek();">Current week</a>
-                <a href="#" class="badge badge-light" onclick="setLastWeek();">Last week</a>
-            </div>
+    <div class="row">
+        <div class="col-md-3">
+            <h4>Quick Filters</h4>
         </div>
-        <hr>
-        <br/>
-
-        <div class="form-group row">
-            <div class="col-md-2">
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="period_radios" id="oneday_radio" value="oneday_radio">
-                    <label class="form-check-label" for="oneday_radio">
-                        One day
-                    </label>
-                </div>
-                <div class="form-check">
-                    <input class="form-check-input" type="radio" name="period_radios" id="range_radio" value="period_radio">
-                    <label class="form-check-label" for="range_radio">
-                        Period
-                    </label>
-                </div>
-            </div>
-
-            <div class="col-md-2 oneday_controls">
-                <div class="input-group date" id="oneday_picker" data-target-input="nearest">
-                    <input type="text" class="form-control datetimepicker-input" data-target="#oneday_picker" data-toggle="datetimepicker"/>
-                    <div class="input-group-append" data-target="#oneday_picker" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 oneday_controls">
-                <div class="input-group date" id="time_start_picker" data-target-input="nearest">
-                    <input type="text" class="form-control datetimepicker-input" data-target="#time_start_picker" data-toggle="datetimepicker"/>
-                    <div class="input-group-append" data-target="#time_start_picker" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2 oneday_controls">
-                <div class="input-group date" id="time_end_picker" data-target-input="nearest">
-                    <input type="text" class="form-control datetimepicker-input" data-target="#time_end_picker" data-toggle="datetimepicker"/>
-                    <div class="input-group-append" data-target="#time_end_picker" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="col-md-3 period_controls" style="display: none;">
-                <div class="input-group date" id="date_start_picker" data-target-input="nearest">
-                    <div class="input-group-prepend" data-target="#date_start_picker" data-toggle="datetimepicker">
-                        <span class="input-group-text">FROM</span>
-                    </div>
-                    <input type="text" class="form-control datetimepicker-input" data-target="#date_start_picker" data-toggle="datetimepicker"/>
-                    <div class="input-group-append" data-target="#date_start_picker" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-3 period_controls" style="display: none;">
-                <div class="input-group date" id="date_end_picker" data-target-input="nearest">
-                    <div class="input-group-prepend" data-target="#date_end_picker" data-toggle="datetimepicker">
-                        <span class="input-group-text">TO</span>
-                    </div>
-                    <input type="text" class="form-control datetimepicker-input" data-target="#date_end_picker" data-toggle="datetimepicker"/>
-                    <div class="input-group-append" data-target="#date_end_picker" data-toggle="datetimepicker">
-                        <div class="input-group-text"><i class="fa fa-calendar"></i></div>
-                    </div>
-                </div>
-            </div>
-            <div class="col-md-2">
-                <div class="btn btn-primary" onclick="LoadCallsData();"><i class="fa fa-search" aria-hidden="true"></i> Seacrh</div>
-            </div>
+        <div class="col-md-9">
+            <a href="#" class="badge badge-success" onclick="setToday();">Today</a>
+            <a href="#" class="badge badge-secondary" onclick="setYesterday();">Yesterday</a>
+            <a href="#" class="badge badge-info" onclick="setCurrentWeek();">Current week</a>
+            <a href="#" class="badge badge-light" onclick="setLastWeek();">Last week</a>
         </div>
+    </div>
+    <hr>
+    <br/>
 
+    <!-- Form controls -->
     <div class="form-group row">
-        <div class="col-md-12">
-        <ul class="nav nav-tabs" id="myTab" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="important-records-tab" data-toggle="tab" href="#important-records" role="tab" aria-controls="important-records" aria-selected="true">Important records</a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="all-records-tab" data-toggle="tab" href="#all-records" role="tab" aria-controls="all-records" aria-selected="false">All records</a>
-            </li>
-        </ul>
+        <!-- Period radios -->
+        <div class="col-md-2">
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="period_radios" id="oneday_radio" value="oneday_radio">
+                <label class="form-check-label" for="oneday_radio">
+                    One day
+                </label>
+            </div>
+            <div class="form-check">
+                <input class="form-check-input" type="radio" name="period_radios" id="range_radio" value="period_radio">
+                <label class="form-check-label" for="range_radio">
+                    Period
+                </label>
+            </div>
+        </div>
+
+        <!-- One day pickers -->
+        <div class="col-md-2 oneday_controls">
+            <div class="input-group date" id="oneday_picker" data-target-input="nearest">
+                <input type="text" class="form-control datetimepicker-input" data-target="#oneday_picker" data-toggle="datetimepicker"/>
+                <div class="input-group-append" data-target="#oneday_picker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 oneday_controls">
+            <div class="input-group date" id="time_start_picker" data-target-input="nearest">
+                <input type="text" class="form-control datetimepicker-input" data-target="#time_start_picker" data-toggle="datetimepicker"/>
+                <div class="input-group-append" data-target="#time_start_picker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 oneday_controls">
+            <div class="input-group date" id="time_end_picker" data-target-input="nearest">
+                <input type="text" class="form-control datetimepicker-input" data-target="#time_end_picker" data-toggle="datetimepicker"/>
+                <div class="input-group-append" data-target="#time_end_picker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-clock-o"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Range of days pickers -->
+        <div class="col-md-3 period_controls" style="display: none;">
+            <div class="input-group date" id="date_start_picker" data-target-input="nearest">
+                <div class="input-group-prepend" data-target="#date_start_picker" data-toggle="datetimepicker">
+                    <span class="input-group-text">FROM</span>
+                </div>
+                <input type="text" class="form-control datetimepicker-input" data-target="#date_start_picker" data-toggle="datetimepicker"/>
+                <div class="input-group-append" data-target="#date_start_picker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 period_controls" style="display: none;">
+            <div class="input-group date" id="date_end_picker" data-target-input="nearest">
+                <div class="input-group-prepend" data-target="#date_end_picker" data-toggle="datetimepicker">
+                    <span class="input-group-text">TO</span>
+                </div>
+                <input type="text" class="form-control datetimepicker-input" data-target="#date_end_picker" data-toggle="datetimepicker"/>
+                <div class="input-group-append" data-target="#date_end_picker" data-toggle="datetimepicker">
+                    <div class="input-group-text"><i class="fa fa-calendar"></i></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Search button -->
+        <div class="col-md-2">
+            <div class="btn btn-primary" onclick="LoadCallsData();"><i class="fa fa-search" aria-hidden="true"></i> Seacrh</div>
         </div>
     </div>
 
+    <!-- Tabs -->
+    <div class="form-group row">
+        <div class="col-md-12">
+            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                <li class="nav-item">
+                    <a class="nav-link active" id="important-records-tab" data-toggle="tab" href="#important-records" role="tab" aria-controls="important-records" aria-selected="true">Important records</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="all-records-tab" data-toggle="tab" href="#all-records" role="tab" aria-controls="all-records" aria-selected="false">All records</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Result tables -->
     <div class="row">
         <div class="col-md-12">
-
-        <div class="tab-content" id="myTabContent">
-            <div class="tab-pane fade show active" id="important-records" role="tabpanel" aria-labelledby="important-records-tab">
-
-                <div class="toolbar form-inline" id="important-records-toolbar">
-                    <input class="form-check-input" onclick="LoadCallsData();" type="checkbox" value="" id="hide_outgoing_missed_check">
-                    <label class="form-check-label" for="hide_outgoing_missed_check">
-                        Hide Outgoing call
-                    </label>
-                </div>
-                <table
+            <div class="tab-content" id="myTabContent">
+                <div class="tab-pane fade show active" id="important-records" role="tabpanel" aria-labelledby="important-records-tab">
+                    <div class="toolbar form-inline" id="important-records-toolbar">
+                        <input class="form-check-input" onclick="LoadCallsData();" type="checkbox" value="" id="hide_outgoing_missed_check">
+                        <label class="form-check-label" for="hide_outgoing_missed_check">
+                            Hide Outgoing call
+                        </label>
+                    </div>
+                    <table
                         id="important-records-table"
                         data-toggle="true"
                         data-toolbar="#important-records-toolbar"
@@ -120,11 +127,11 @@
                         data-pagination="true"
                         data-show-fullscreen="true"
                         data-show-export="true">
-                </table>
-            </div>
-            <div class="tab-pane fade" id="all-records" role="tabpanel" aria-labelledby="all-records-tab">
-                <div id="all-records-toolbar"></div>
-                <table
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="all-records" role="tabpanel" aria-labelledby="all-records-tab">
+                    <div id="all-records-toolbar"></div>
+                    <table
                         id="all-records-table"
                         data-toggle="true"
                         data-toolbar="#all-records-toolbar"
@@ -133,13 +140,13 @@
                         data-pagination="true"
                         data-show-fullscreen="true"
                         data-show-export="true">
-                </table>
+                    </table>
+                </div>
             </div>
-        </div>
         </div>
     </div>
 
-    <!-- Modal -->
+    <!-- Modal for connection error -->
     <div class="modal fade" id="sqlalertbox" tabindex="-1" role="dialog" aria-labelledby="sqlalertboxLabel" aria-hidden="true">
         <div class="modal-dialog" role="document">
             <div class="modal-content">
@@ -156,15 +163,10 @@
         </div>
     </div>
 
-
+    <!-- Footer -->
+    <footer class="pull-right">
+        <span class="text-muted"><a href="https://www.linkedin.com/in/voloshanenko">Igor Voloshanenko</a> <i class="fa fa-copyright"></i> 2019</span>
+    </footer>
 
 </div>
-    <footer class="footer mt-auto py-3">
-        <div class="container">
-            <span class="text-muted">Nagibator. Suki i padlyuki <i class="fa fa-copyright"></i> version 0.1</span>
-            <br/>
-            <span class="text-muted">Igor Voloshanenko & Snizhana Tiutchenko <i class="fa fa-copyright"></i> 2019</span>
-
-        </div>
-    </footer>
 {% endblock %}

@@ -123,6 +123,9 @@ function LoadCallsData() {
         var date_end = $("#date_end_picker").datetimepicker('date').format('YYYY-MM-DD 23:59:59')
     }
 
+    $('#all-records-table').bootstrapTable('removeAll')
+    $('#important-records-table').bootstrapTable('removeAll')
+
     $.getJSON($SCRIPT_ROOT + '/_raw_data', {
         date_start: date_start,
         date_end: date_end
@@ -137,7 +140,6 @@ function GenerateTableData(data){
         $('#sqlalertbox').modal('hide');
 
         var all_records = data["result"]
-
         hide_outgoing_missed = $('#hide_outgoing_missed_check')[0].checked
 
         if (hide_outgoing_missed){
@@ -172,7 +174,7 @@ function updateTable(important_records, all_records){
             "title": "Direction",
             "formatter": "CallDirectionFormatter",
             "halign": "center",
-            "align": "left",
+            "align": "center",
             "sortable": true
         },
         {
@@ -215,8 +217,16 @@ function updateTable(important_records, all_records){
         pageSize: 25,
         rowAttributes: rowAttributes,
         exportDataType: "all",
-        exportTypes: ['xlsx', 'pdf'],
-        exportOptions:  {escape: true}
+        exportTypes: ['excel', 'pdf'],
+        exportOptions:{
+            fileName: 'call_report',
+            worksheetName: 'Call Report',
+            tableName: 'call_report',
+            mso: {
+                fileFormat: 'xlshtml',
+                onMsoNumberFormat: doOnMsoNumberFormat
+            }
+        }
      });
 
     $('#all-records-table').on('all.bs.table', function (e) {
@@ -232,8 +242,16 @@ function updateTable(important_records, all_records){
         pageSize: 25,
         rowAttributes: rowAttributes,
         exportDataType: "all",
-        exportTypes: ['xlsx', 'pdf'],
-        exportOptions:  {escape: true}
+        exportTypes: ['excel', 'pdf'],
+        exportOptions:{
+            fileName: 'call_report',
+            worksheetName: 'Call Report',
+            tableName: 'call_report',
+            mso: {
+                fileFormat: 'xlshtml',
+                onMsoNumberFormat: doOnMsoNumberFormat
+            }
+        }
     });
 
     $('#important-records-table').on('all.bs.table', function (e) {
@@ -242,7 +260,16 @@ function updateTable(important_records, all_records){
 
     $('#important-records-table').bootstrapTable('load', important_records);
 
+    $("#loadingspinner").modal('hide');
 };
+
+function doOnMsoNumberFormat(cell, row, col){
+    var result = "";
+    if (row > 0 && col == 2){
+        result = "\\@";
+    }
+    return result;
+}
 
 function rowStyle(row, index) {
     if (row.disposition == "ANSWERED"){
@@ -301,23 +328,24 @@ function rowAttributes(row, index) {
 function CallDirectionFormatter(value, row) {
     var icon
     if (row.direction == "in"){
-        icon = "phone_callback"
+        icon = "fa fa-sign-in"
         direction = "Incoming"
     } else if (row.direction == "out"){
-        icon = "phone_forwarded"
+        icon = "fa fa-sign-out"
         direction = "Outgoing"
     }
-    return '<i class="material-icons">' + icon + '</i> ' + direction
+    return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + direction
 }
 
 function CallDispositionFormatter(value, row) {
     var icon
     if (row.disposition == "NO ANSWER"){
-        icon = "phone_missed"
+        icon = "fa fa-reply-all"
     }else if (row.disposition != "ANSWERED"){
-        icon = "error"
+        icon = "fa fa-exclamation-triangle"
     }else {
         icon = ''
     }
-    return '<i class="material-icons">' + icon + '</i> ' + value
+
+    return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + value
 }

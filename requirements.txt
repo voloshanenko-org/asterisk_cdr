@@ -1,4 +1,6 @@
 flask
 flask-sqlalchemy
 mysqlclient
+requests
+portainer-api
 

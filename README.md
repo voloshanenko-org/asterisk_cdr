@@ -1,21 +1,19 @@
 Bionova PBX call logs viewer
 
-
-Local build:
-
+Local env:
 pip3 install virtualenv
 virtualenv -p python3 venv
 source venv/bin/activate
 
-Docker build:
+Docker/Portainer deployment:
 
 PROD:
-1. Set env variable
-2. Run docker-compose
-#docker-compose up -d
-3. To rebuild run with --build flag
+1. Copy env.dev file to env.prod. Modife variables inside env.prod
+2. Source env file
+#source env.prod
+3. Run deploy to portainer via deploy.py script
+#python deploy.py
 
- 
 DEV:
 1. Edit env.dev file to set real values for DB host
 #vim env.dev

@@ -79,12 +79,11 @@ def get_call_data_final(date_start, date_end):
                 for call in not_answered_call_data:
                     # Incoming call
                     if call["dcontext"] in ['ext-local', 'ext-queues']:
-                        if re.match(r"9[0-9][1-9]", call["src"]):
-                            continue
-
                         call_data.setdefault("calldate", call["calldate"])
                         call_data.setdefault("direction", "in")
                         call_data.setdefault("src", call["src"])
+                        if (re.match(r"9[0-9][1-9]", call["src"]) and re.match(r"9[0-9][1-9]", call["dst"])):
+                            call_data.setdefault("dst", call["dst"])
                         call_data.setdefault("disposition", "NO ANSWER")
                         call_data.setdefault("talking_duration", 0)
                         call_data.setdefault("waiting_duration", call["duration"] - call["billsec"])
@@ -102,6 +101,10 @@ def get_call_data_final(date_start, date_end):
                         call_data["direction"] = "out"
                         call_data.setdefault("src", call["cnum"])
                         call_data.setdefault("dst", call["dst"])
+                        if call["disposition"] == "FAILED":
+                            call_data.setdefault("disposition", "NO ANSWER")
+                        else:
+                            call_data.setdefault("disposition", call["disposition"])
                         call_data.setdefault("disposition", call["disposition"])
                         call_data.setdefault("talking_duration", 0)
                         call_data.setdefault("waiting_duration", call["duration"] - call["billsec"])

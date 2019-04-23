@@ -7,6 +7,9 @@ source venv/bin/activate
 
 Docker/Portainer deployment:
 
+>> We use nginx-lets-encrypt companion - so for seamless integration we need pre-create webproxy network
+>> #docker network create webproxy --opt encrypted=true
+
 PROD:
 1. Copy env.dev file to env.prod. Modife variables inside env.prod
 2. Source env file

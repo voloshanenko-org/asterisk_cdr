@@ -1,10 +1,21 @@
-from app.models import CallsLog
+from app.models import CallsLog, User
 from sqlalchemy import and_, not_
 from itertools import groupby
 from operator import itemgetter
 from sqlalchemy import exc
 import re
 
+
+def check_user_credentials(username, password):
+    user = User.query\
+        .filter(User.keyword == "secret")\
+        .filter(User.id == username)\
+        .first()
+
+    if user is None or not user.data == password:
+        return None, False
+    else:
+        return user, True
 
 def get_raw_call_data(date_start, date_end):
     calls = CallsLog.query\

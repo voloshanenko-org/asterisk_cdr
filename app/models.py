@@ -1,5 +1,6 @@
 from sqlalchemy.inspection import inspect
-from app import db
+from app import db, login
+from flask_login import UserMixin
 
 class BaseModel(db.Model):
     __abstract__ = True
@@ -17,6 +18,19 @@ class BaseModel(db.Model):
 
     def __getitem__(self, key):
         return getattr(self, key)
+
+class User(UserMixin, BaseModel):
+    __bind_key__ = "users"
+    __tablename__ = "sip"
+    id = db.Column(db.String(20), index=True, unique=True, primary_key=True)
+    keyword = db.Column(db.String(30), index=True, unique=True)
+    data = db.Column(db.String(255))
+
+
+@login.user_loader
+def load_user(id):
+    return User.query.get(int(id))
+
 
 class CallsLog(BaseModel):
     __tablename__ = "cdr"

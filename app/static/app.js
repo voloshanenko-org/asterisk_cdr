@@ -1,6 +1,8 @@
 $(window).on('load', function(){
-    setControls();
-    setToday();
+    if (window.location.pathname != "/login") {
+        setControls();
+        setToday();
+    }
 });
 
 function setControls(){

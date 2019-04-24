@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+{% block body %}
+
+<div class="container" style="padding: 10px; ">
+
+    <div class="row">
+        <div class="col-sm-9 col-md-7 col-lg-5 mx-auto">
+            <div class="card card-signin my-5">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Sign In</h5>
+                    <form class="form-signin" method="post" role="form">
+
+                        <div class="input-group form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fa fa-user"></i></span>
+                            </div>
+                            <input type="text" class="form-control" name="username" id="usernamesername" placeholder="Username" required autofocus>
+                        </div>
+
+                        <div class="input-group form-group">
+                            <div class="input-group-prepend">
+                                <span class="input-group-text"><i class="fa fa-key"></i></span>
+                            </div>
+                            <input type="password" class="form-control" name="password" id="password" placeholder="Password" required>
+                        </div>
+
+                        <div class="custom-control custom-checkbox mb-3">
+                            <input type="checkbox" name="rememberme_check" class="custom-control-input" id="rememberme_check" value="">
+                            <label class="custom-control-label" for="rememberme_check">Remember me</label>
+                        </div>
+
+                        {% with errors = get_flashed_messages(category_filter=["error"]) %}
+                            {% if errors %}
+                                {% for message in errors %}
+                                    <div class="alert alert-danger" align="center">
+                                        {{ message }}
+                                    </div>
+                                {% endfor %}
+                            {% endif %}
+                        {% endwith %}
+
+                        <div class="form-group">
+                            <input type="submit" value="Login" class="btn btn-primary btn-block text-uppercase">
+                        </div>
+
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

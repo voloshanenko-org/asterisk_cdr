@@ -9,12 +9,24 @@
         <div class="col-md-3">
             <h4>Quick Filters</h4>
         </div>
-        <div class="col-md-9">
+        <div class="col-md-7">
             <a href="#" class="badge badge-success" onclick="setToday();">Today</a>
             <a href="#" class="badge badge-secondary" onclick="setYesterday();">Yesterday</a>
             <a href="#" class="badge badge-info" onclick="setCurrentWeek();">Current week</a>
             <a href="#" class="badge badge-light" onclick="setLastWeek();">Last week</a>
         </div>
+
+        {% if not current_user.is_anonymous %}
+            <div class="col-md-2" align="center">
+                <div class="card">
+                    User: <strong>{{ current_user.id }}
+                    <a href="{{ url_for('logout') }}"><i class="fa fa-times-circle" aria-hidden="true"></i></a>
+                    </strong>
+                </div>
+            </div>
+        {% endif %}
+
+
     </div>
     <hr>
     <br/>
@@ -162,11 +174,6 @@
             </div>
         </div>
     </div>
-
-    <!-- Footer -->
-    <footer class="pull-right">
-        <span class="text-muted"><a href="https://www.linkedin.com/in/voloshanenko">Igor Voloshanenko</a> <i class="fa fa-copyright"></i> 2019</span>
-    </footer>
 
 </div>
 {% endblock %}

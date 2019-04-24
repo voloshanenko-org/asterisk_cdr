@@ -25,20 +25,20 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/js/tempusdominus-bootstrap-4.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tempusdominus-bootstrap-4/5.1.2/css/tempusdominus-bootstrap-4.min.css" />
 
-    <script src="{{ url_for('static', filename='app.js')}}"></script>
-
     <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
 
     <script type=text/javascript>
         $SCRIPT_ROOT = {{ request.script_root|tojson|safe }};
     </script>
 
-    <style type='text/css'>
-        .row-index {
-            width: 50px;
-            display: inline-block;
-        }
-    </style>
-
+    <script src="{{ url_for('static', filename='app.js')}}"></script>
+    <link href="{{ url_for('static', filename='app.css')}}" rel="stylesheet">
 </head>
 {% block body %}{% endblock %}
+
+<!-- Footer -->
+<div class="container" style="padding: 10px; ">
+    <footer class="pull-right">
+        <span class="text-muted"><a href="https://www.linkedin.com/in/voloshanenko">Igor Voloshanenko</a> <i class="fa fa-copyright"></i> 2019</span>
+    </footer>
+</div>

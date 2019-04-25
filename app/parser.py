@@ -3,6 +3,7 @@ from sqlalchemy import and_, not_
 from itertools import groupby
 from operator import itemgetter
 from sqlalchemy import exc
+from json import dumps
 import re
 
 
@@ -82,9 +83,12 @@ def get_call_data_final(date_start, date_end):
                     call_data.setdefault("talking_duration", call["billsec"])
                     call_data.setdefault("waiting_duration", call["duration"] - call["billsec"])
                     call_data.setdefault("linkedid", call["linkedid"])
+                elif call["dcontext"] in ['app-blacklist-last']:
+                    continue
                 else:
-                    raise call
-                    exit(1)
+                    print("Unknown call dcontext: " + call["dcontext"])
+                    raise ValueError(call["dcontext"])
+
 
             if not call_data:
                 for call in not_answered_call_data:
@@ -120,9 +124,11 @@ def get_call_data_final(date_start, date_end):
                         call_data.setdefault("talking_duration", 0)
                         call_data.setdefault("waiting_duration", call["duration"] - call["billsec"])
                         call_data.setdefault("linkedid", call["linkedid"])
+                    elif call["dcontext"] in ['app-blacklist-last']:
+                        continue
                     else:
-                        raise call
-                        exit(1)
+                        print("Unknown call dcontext: " + call["dcontext"])
+                        raise ValueError(call["dcontext"])
 
             if call_data:
                 final_data.append(call_data)

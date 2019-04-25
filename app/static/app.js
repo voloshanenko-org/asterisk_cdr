@@ -146,14 +146,20 @@ function LoadCallsData() {
     }).done(function(data) {
         GenerateTableData(data)
     }).fail(function(data){
-        window.location.replace("/login");
+        if (data.status == 500){
+            $("#alertbox .modal-title").text(data.statusText);
+            $("#alertbox .modal-body").text(data.status + ': Please contact support to fix it!');
+            $('#alertbox').modal();
+        }else{
+            window.location.replace("/login");
+        }
     });
 };
 
 function GenerateTableData(data){
 
     if("result" in data){
-        $('#sqlalertbox').modal('hide');
+        $('#alertbox').modal('hide');
 
         var all_records = data["result"]
         hide_outgoing_missed = $('#hide_outgoing_missed_check')[0].checked
@@ -169,9 +175,9 @@ function GenerateTableData(data){
         }
         updateTable(important_records, all_records)
     }else if ("error" in data){
-        $("#sqlalertbox .modal-title").text("DB Operational Error");
-        $("#sqlalertbox .modal-body").text(data["error"]);
-        $('#sqlalertbox').modal();
+        $("#alertbox .modal-title").text("DB Operational Error");
+        $("#alertbox .modal-body").text(data["error"]);
+        $('#alertbox').modal();
     }
 }
 

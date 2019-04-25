@@ -1,6 +1,7 @@
 from app import parser
 from json import dumps
 import os
+from datetime import datetime
 from werkzeug.urls import url_parse
 from flask import render_template, request, Response, url_for, redirect, flash
 from flask_login import current_user, login_user, logout_user, login_required
@@ -63,10 +64,15 @@ def getcalls_finish():
     date_end = request.args.get("date_end")
 
     try:
-        calls_data_raw = parser.get_call_data_final(date_start=date_start, date_end=date_end)
-        answer = {"result": calls_data_raw}
-    except exc.OperationalError as e:
-        answer = {"error": str(e.orig.args[1])}
+        date_start_obj = datetime.strptime(date_start, '%Y-%m-%d %H:%M:%S')
+        date_end_obj = datetime.strptime(date_end, '%Y-%m-%d %H:%M:%S')
+        try:
+            calls_data_raw = parser.get_call_data_final(date_start=date_start, date_end=date_end)
+            answer = {"result": calls_data_raw}
+        except exc.OperationalError as e:
+            answer = {"error": str(e.orig.args[1])}
+    except ValueError as e:
+        answer = {"error": str("Wrong values passed!")}
 
     json_response=dumps(answer, default=str)
     response=Response(json_response,content_type='application/json; charset=utf-8')

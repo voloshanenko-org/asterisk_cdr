@@ -1,5 +1,5 @@
 from app import parser
-import json
+from json import dumps
 import os
 from werkzeug.urls import url_parse
 from flask import render_template, request, Response, url_for, redirect, flash
@@ -68,7 +68,7 @@ def getcalls_finish():
     except exc.OperationalError as e:
         answer = {"error": str(e.orig.args[1])}
 
-    json_response=json.dumps(answer, default=str)
+    json_response=dumps(answer, default=str)
     response=Response(json_response,content_type='application/json; charset=utf-8')
     response.headers.add('content-length',len(json_response))
     response.status_code=200

@@ -1,15 +1,15 @@
 {% extends "layout.html" %}
 {% block body %}
-<div class="container" style="padding: 10px; ">
+<div class="container horizontal-center" style="padding: 10px; ">
 
     <!-- Quick links -->
     <h1></h1>
     <br/>
     <div class="row">
-        <div class="col-md-3">
-            <h4>Quick Filters</h4>
+        <div class="col-md-2">
+            <h5>Quick Filters</h5>
         </div>
-        <div class="col-md-7">
+        <div class="col-md-6" align="left">
             <a href="#" class="badge badge-success" onclick="setToday();">Today</a>
             <a href="#" class="badge badge-secondary" onclick="setYesterday();">Yesterday</a>
             <a href="#" class="badge badge-info" onclick="setCurrentWeek();">Current week</a>
@@ -18,14 +18,11 @@
 
         {% if not current_user.is_anonymous %}
             <div class="col-md-2" align="center">
-                <div class="card">
-                    User: <strong>{{ current_user.id }}
-                    <a href="{{ url_for('logout') }}"><i class="fa fa-times-circle" aria-hidden="true"></i></a>
-                    </strong>
-                </div>
+                <a href="{{ url_for('logout') }}" class="badge badge-light">User: <h5>{{ current_user.id }}
+                    <i class="fa fa-times-circle" aria-hidden="true"></i></h5>
+                </a>
             </div>
         {% endif %}
-
 
     </div>
     <hr>
@@ -107,7 +104,7 @@
 
     <!-- Tabs -->
     <div class="form-group row">
-        <div class="col-md-12">
+        <div class="col-md-10">
             <ul class="nav nav-tabs" id="myTab" role="tablist">
                 <li class="nav-item">
                     <a class="nav-link active" id="important-records-tab" data-toggle="tab" href="#important-records" role="tab" aria-controls="important-records" aria-selected="true">Important records</a>
@@ -121,7 +118,7 @@
 
     <!-- Result tables -->
     <div class="row">
-        <div class="col-md-12">
+        <div class="col-md-10">
             <div class="tab-content" id="myTabContent">
                 <div class="tab-pane fade show active" id="important-records" role="tabpanel" aria-labelledby="important-records-tab">
                     <div class="toolbar form-inline" id="important-records-toolbar">
@@ -176,4 +173,14 @@
     </div>
 
 </div>
+
+<!-- Footer -->
+<div class="container" style="padding: 10px; ">
+    <div class="col-md-10">
+        <footer class="pull-right">
+            <span class="text-muted"><a href="https://www.linkedin.com/in/voloshanenko">Igor Voloshanenko</a> <i class="fa fa-copyright"></i> 2019</span>
+        </footer>
+    </div>
+</div>
+
 {% endblock %}

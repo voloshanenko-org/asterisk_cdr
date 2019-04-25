@@ -54,7 +54,7 @@ def login():
 @app.route('/logout')
 def logout():
     logout_user()
-    return redirect(url_for('index'))
+    return redirect(url_for('login'))
 
 @app.route('/_raw_data/', methods=['GET'])
 @login_required
@@ -71,6 +71,17 @@ def getcalls_finish():
     json_response=json.dumps(answer, default=str)
     response=Response(json_response,content_type='application/json; charset=utf-8')
     response.headers.add('content-length',len(json_response))
+    response.status_code=200
+
+    return response
+
+
+# Dummy route to check user auth
+@app.route('/_is_authorized/', methods=['GET'])
+@login_required
+def is_authorized():
+    response=Response({},content_type='application/json; charset=utf-8')
+    response.headers.add('content-length',len({}))
     response.status_code=200
 
     return response

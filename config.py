@@ -1,8 +1,13 @@
 import os
+import random
+import string
 
 class Config(object):
 
-    SEND_FILE_MAX_AGE_DEFAULT = 0
+    rnd_secret_key = ''.join(random.SystemRandom().choice(string.ascii_uppercase + string.digits) for _ in range(50))
+
+    SESSION_TYPE = 'filesystem'
+    SECRET_KEY = os.environ.get('SECRET_KEY') or 'you-will-never-guess' or rnd_secret_key
     DB_HOST = os.environ.get('DB_HOST') or '127.0.0.1'
     DB_NAME_CDR = os.environ.get('DB_NAME_CDR') or 'asteriskcdrdb'
     DB_NAME_USERS = os.environ.get('DB_NAME_USERS') or 'asterisk'

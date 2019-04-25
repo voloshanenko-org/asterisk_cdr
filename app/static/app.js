@@ -2,8 +2,20 @@ $(window).on('load', function(){
     if (window.location.pathname != "/login") {
         setControls();
         setToday();
+        // Schedule first auth check in 1 minute after load
+        setTimeout(checkAuth, 60*1000);
     }
 });
+
+function checkAuth() {
+    $.getJSON($SCRIPT_ROOT + '/_is_authorized', {
+    }).done(function(data) {
+        // Schedule next auth check in 1 minute
+        setTimeout(checkAuth, 60*1000);
+    }).fail(function(data){
+        window.location.replace("/login");
+    });
+}
 
 function setControls(){
 
@@ -131,8 +143,10 @@ function LoadCallsData() {
     $.getJSON($SCRIPT_ROOT + '/_raw_data', {
         date_start: date_start,
         date_end: date_end
-    }, function(data) {
+    }).done(function(data) {
         GenerateTableData(data)
+    }).fail(function(data){
+        window.location.replace("/login");
     });
 };
 

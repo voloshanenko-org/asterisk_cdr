@@ -86,8 +86,9 @@ def getcalls_finish():
 @app.route('/_is_authorized/', methods=['GET'])
 @login_required
 def is_authorized():
-    response=Response({},content_type='application/json; charset=utf-8')
-    response.headers.add('content-length',len({}))
+    status = '{"status": "OK"}'
+    response=Response(status,content_type='application/json; charset=utf-8')
+    response.headers.add('content-length',len(status))
     response.status_code=200
 
     return response

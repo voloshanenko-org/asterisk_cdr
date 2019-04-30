@@ -18,17 +18,6 @@ function checkAuth() {
 }
 
 function setControls(){
-
-    // $('#method2_radio').click()
-    //
-    // $('#method1_radio').on("click", function() {
-    //     LoadCallsData()
-    // });
-    //
-    // $('#method2_radio').on("click", function() {
-    //     LoadCallsData()
-    // });
-
     $("#oneday_picker").datetimepicker({
         format: 'L',
         MaxDate: '0'
@@ -404,14 +393,17 @@ function rowAttributes(row, index) {
                 'Before callback elapsed: ' + row.callback.before_call + ' seconds'
             ].join('<br>')
     } else if ("missed" in row && (row.direction == "Outgoing" || row.direction == "Internal")){
-        result["data-content"] = [
-                'Missed at: ' + row.missed.calldate,
-                'By: ' + row.missed.src,
-                'After call missed elapsed: ' + row.missed.before_call + ' seconds'
+        missed_calls = []
+        for (call_index in row.missed){
+            missed_call = [
+                'Missed at: ' + row.missed[call_index].calldate,
+                'By: ' + row.missed[call_index].src,
+                'After call missed elapsed: ' + row.missed[call_index].before_call + ' seconds'
             ].join('<br>')
+            missed_calls.push(missed_call)
+        }
+        result["data-content"] = missed_calls.join('<hr>')
     }
-
-    result["data-content"]
 
     return result
 }
@@ -437,7 +429,6 @@ function CallDispositionFormatter(value, row) {
     }
     return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + value
 }
-
 
 function CallRecordFileFormatter(value, row) {
     if (row.record_file) {

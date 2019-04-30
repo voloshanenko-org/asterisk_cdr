@@ -122,27 +122,36 @@ def calldata_json(date_start, date_end):
 
                 final_data.append(call_data)
 
-        incoming_missed_calls=list(filter(lambda d: d['disposition'] == "MISSED" and d['direction'] == "Incoming" , final_data))
         outcoming_calls=list(filter(lambda d: d['direction'] != "Incoming" , final_data))
-
         #Find if missed call was recalled
         for idx, call in enumerate(final_data):
             if call['direction'] == "Incoming" and call["disposition"] == "MISSED":
                 callback = list(filter(lambda d: d['dst'] in call['src'] and d['calldate'] > call['calldate'], outcoming_calls))
                 if callback:
                     final_data[idx]["callback"] = {
+                        "linkedid": callback[0]['linkedid'],
                         "calldate": callback[0]['calldate'],
                         "src": callback[0]['src'],
                         "before_call": (callback[0]['calldate'] - call['calldate']).total_seconds()
                     }
-            elif call['direction'] == "Outgoing":
-                callback = list(filter(lambda d: call['dst'] in d['src'] and d['calldate'] < call['calldate'], incoming_missed_calls))
-                if callback:
-                    final_data[idx]["missed"] = {
-                        "calldate": callback[0]['calldate'],
-                        "src": callback[0]['src'],
-                        "before_call": (call['calldate']-callback[0]['calldate']).total_seconds()
-                    }
+
+        incoming_missed_callback_calls=list(filter(lambda d: d['disposition'] == "MISSED" and d['direction'] == "Incoming" , final_data))
+        #Add information about missed calls to outgoing
+        for idx, call in enumerate(final_data):
+            if call['direction'] == "Outgoing":
+                missed_calls = list(filter(lambda d: call['dst'] in d['src']
+                                               and d['calldate'] < call['calldate']
+                                               and d['callback']['linkedid'] == call['linkedid'] , incoming_missed_callback_calls))
+                if missed_calls:
+                    missed_calls_array = []
+                    for missed_call in missed_calls:
+                        missed_data = {
+                            "calldate": missed_call['calldate'],
+                            "src": missed_call['src'],
+                            "before_call": (call['calldate']-missed_call['calldate']).total_seconds()
+                        }
+                        missed_calls_array.append(missed_data)
+                    final_data[idx]["missed"] = missed_calls_array
 
     except exc.OperationalError as e:
         raise

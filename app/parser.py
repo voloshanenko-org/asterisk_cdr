@@ -200,9 +200,9 @@ def calldata_json(date_start, date_end):
                     call_start = event["eventtime"]
                     #Set incoming or outgoing call
                     if event["context"] == "from-pstn":
-                        call_data.setdefault("direction", "in")
+                        call_data.setdefault("direction", "Incoming")
                     elif event["context"] == "from-internal":
-                        call_data.setdefault("direction", "out")
+                        call_data.setdefault("direction", "Outgoing")
                         # Set src/dst for outgoing call
                         call_data.setdefault("src", event["cid_num"])
                         call_data.setdefault("dst", event["exten"])
@@ -228,12 +228,16 @@ def calldata_json(date_start, date_end):
                     if event["context"] == "ext-queues":
                         # Set src/dst for incoming missed call
                         call_data.setdefault("src", event["cid_num"])
+                    elif event["context"] == "ext-local":
+                        call_data["direction"] = "Internal"
                     if call_status == "ANSWER":
                         table_call_status = "ANSWERED"
                     elif call_status == "CONGESTION":
                         table_call_status = "MISSED"
                     elif call_status in ["NOANSWER", "CANCEL"]:
                         table_call_status = "NO ANSWER"
+                    elif not call_status:
+                        table_call_status = "MISSED"
                     else:
                         table_call_status = call_status
 

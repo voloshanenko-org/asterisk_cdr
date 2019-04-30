@@ -9,3 +9,19 @@ input:focus{
     box-shadow: 0 0 0 0 !important;
 
 }
+
+table tr td, table tr th {
+    max-width: 10vw;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+table{
+    width:100%;
+}
+
+audio
+{
+
+    height:30px;
+}

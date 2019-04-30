@@ -159,8 +159,6 @@ function LoadCallsData() {
     $('#all-records-table').bootstrapTable('removeAll')
     $('#important-records-table').bootstrapTable('removeAll')
 
-
-
     $.getJSON($SCRIPT_ROOT + endpoint, {
         date_start: date_start,
         date_end: date_end
@@ -187,7 +185,8 @@ function GenerateTableData(data){
 
         if (hide_outgoing_missed){
             var important_records = data["result"].filter(function(item) {
-                return !(item["disposition"] == "ANSWERED" && item['direction'] == "in") && !(item["direction"] == "out");
+                return !(item["disposition"] == "ANSWERED" && item['direction'] == "Incoming")
+                    && !(item["direction"] == "Outgoing" || item["direction"] == "Internal");
             });
         }else{
             var important_records = data["result"].filter(function(item) {
@@ -223,11 +222,15 @@ function updateTable(important_records, all_records){
         {
             "field": "src",
             "title": "From",
+            "halign": "center",
+            "align": "center",
             "sortable": true
         },
         {
             "field": "dst",
             "title": "To",
+            "halign": "center",
+            "align": "center",
             "sortable": true
         },
         {
@@ -240,14 +243,14 @@ function updateTable(important_records, all_records){
         },
         {
             "field": "waiting_duration",
-            "title": "Waiting, sec",
+            "title": "Wait, sec",
             "halign": "center",
             "align": "center",
             "sortable": true
         },
         {
             "field": "talking_duration",
-            "title": "Talking, sec",
+            "title": "Talk, sec",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -280,11 +283,15 @@ function updateTable(important_records, all_records){
         {
             "field": "src",
             "title": "From",
+            "halign": "center",
+            "align": "center",
             "sortable": true
         },
         {
             "field": "dst",
             "title": "To",
+            "halign": "center",
+            "align": "center",
             "sortable": true
         },
         {
@@ -297,7 +304,7 @@ function updateTable(important_records, all_records){
         },
         {
             "field": "waiting_duration",
-            "title": "Waiting, sec",
+            "title": "Wait, sec",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -418,14 +425,12 @@ function rowAttributes(row, index) {
 
 function CallDirectionFormatter(value, row) {
     var icon
-    if (row.direction == "in"){
+    if (row.direction == "Incoming"){
         icon = "fa fa-sign-in"
-        direction = "Incoming"
     } else if (row.direction == "out"){
         icon = "fa fa-sign-out"
-        direction = "Outgoing"
     }
-    return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + direction
+    return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + row.direction
 }
 
 function CallDispositionFormatter(value, row) {
@@ -442,10 +447,8 @@ function CallDispositionFormatter(value, row) {
 }
 
 
-function CallRecordFileFormatter(value, row){
-    if (row.record_file){
-        audio_player = "<audio class='mw-100 mh-100' src='" + row.record_file + "' controls></audio>"
-    } else
-        audio_player = ""
-    return audio_player
+function CallRecordFileFormatter(value, row) {
+    if (row.record_file) {
+        return "<div class='mw-100'><audio class='mw-100' src='" + row.record_file + "' controls></audio></div>"
+    }
 }

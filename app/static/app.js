@@ -19,6 +19,16 @@ function checkAuth() {
 
 function setControls(){
 
+    $('#method2_radio').click()
+
+    $('#method1_radio').on("click", function() {
+        LoadCallsData()
+    });
+
+    $('#method2_radio').on("click", function() {
+        LoadCallsData()
+    });
+
     $("#oneday_picker").datetimepicker({
         format: 'L',
         MaxDate: '0'
@@ -125,6 +135,15 @@ function LoadCallsData() {
     oneday_checked = $('#oneday_radio')[0].checked
     range_checked = $('#range_radio')[0].checked
 
+    method1_checked = $('#method1_radio')[0].checked
+    method2_checked = $('#method2_radio')[0].checked
+
+    if (method1_checked){
+        endpoint = "/_raw_data_old"
+    }else if(method2_checked){
+        endpoint = "/_raw_data"
+    }
+
     if (oneday_checked) {
         var time_start = $("#time_start_picker").datetimepicker('date').format('HH:mm:00')
         var time_end = $("#time_end_picker").datetimepicker('date').format('HH:mm:00')
@@ -140,13 +159,15 @@ function LoadCallsData() {
     $('#all-records-table').bootstrapTable('removeAll')
     $('#important-records-table').bootstrapTable('removeAll')
 
-    $.getJSON($SCRIPT_ROOT + '/_raw_data', {
+
+
+    $.getJSON($SCRIPT_ROOT + endpoint, {
         date_start: date_start,
         date_end: date_end
     }).done(function(data) {
         GenerateTableData(data)
     }).fail(function(data){
-        if (data.status == 500){
+        if (data.status != 200){
             $("#alertbox .modal-title").text(data.statusText);
             $("#alertbox .modal-body").text(data.status + ': Please contact support to fix it!');
             $('#alertbox').modal();
@@ -183,7 +204,7 @@ function GenerateTableData(data){
 
 function updateTable(important_records, all_records){
 
-    var columns = [
+    var columns_all = [
         {
             "field": "calldate",
             "title": "Date",
@@ -230,11 +251,61 @@ function updateTable(important_records, all_records){
             "halign": "center",
             "align": "center",
             "sortable": true
+        },
+        {
+            "field": "record_file",
+            "title": "Call record",
+            "formatter": "CallRecordFileFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        }
+    ]
+    var columns_important = [
+        {
+            "field": "calldate",
+            "title": "Date",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "direction",
+            "title": "Direction",
+            "formatter": "CallDirectionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "src",
+            "title": "From",
+            "sortable": true
+        },
+        {
+            "field": "dst",
+            "title": "To",
+            "sortable": true
+        },
+        {
+            "field": "disposition",
+            "title": "Status",
+            "formatter": "CallDispositionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "waiting_duration",
+            "title": "Waiting, sec",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
         }
     ]
 
     $('#all-records-table').bootstrapTable({
-        columns: columns,
+        columns: columns_all,
         rowStyle: rowStyle,
         pageSize: 25,
         rowAttributes: rowAttributes,
@@ -259,7 +330,7 @@ function updateTable(important_records, all_records){
 
 
     $('#important-records-table').bootstrapTable({
-        columns: columns,
+        columns: columns_important,
         rowStyle: rowStyle,
         pageSize: 25,
         rowAttributes: rowAttributes,
@@ -297,16 +368,17 @@ function rowStyle(row, index) {
     if (row.disposition == "ANSWERED"){
         if ("missed" in row){
             css_class = "alert-primary"
-
         }else{
             css_class = "alert-success"
         }
-    } else if (row.disposition == "NO ANSWER"){
-        if ("callback" in row){
+    } else if (row.disposition == "MISSED") {
+        if ("callback" in row) {
             css_class = "alert-primary"
-        }else{
+        } else {
             css_class = "alert-danger"
         }
+    } else if (row.disposition == "NO ANSWER") {
+        css_class = "alert alert-warning"
     } else {
         css_class = "alert-secondary"
     }
@@ -318,31 +390,28 @@ function rowStyle(row, index) {
 }
 
 function rowAttributes(row, index) {
-    var result = ""
+    var result = {
+        'data-toggle': 'popover',
+        'data-placement': 'bottom',
+        'data-trigger': 'hover',
+        'data-html': true
+    }
 
-    if ("callback" in row && row.direction == "in" && row.disposition == "NO ANSWER") {
-        result = {
-            'data-toggle': 'popover',
-            'data-placement': 'bottom',
-            'data-trigger': 'hover',
-            'data-content': [
+    if ("callback" in row && row.direction == "in" && row.disposition == "MISSED") {
+        result["data-content"] = [
                 'Callback at: ' + row.callback.calldate,
                 'By: ' + row.callback.src,
-                'Before callback elapsed: ' + row.callback.before_call + ' seconds',
-            ].join(', ')
-        }
+                'Before callback elapsed: ' + row.callback.before_call + ' seconds'
+            ].join('<br>')
     } else if ("missed" in row && row.direction == "out"){
-        result = {
-            'data-toggle': 'popover',
-            'data-placement': 'bottom',
-            'data-trigger': 'hover',
-            'data-content': [
+        result["data-content"] = [
                 'Missed at: ' + row.missed.calldate,
                 'By: ' + row.missed.src,
-                'After call missed elapsed: ' + row.missed.before_call + ' seconds',
-            ].join(', ')
-        }
+                'After call missed elapsed: ' + row.missed.before_call + ' seconds'
+            ].join('<br>')
     }
+
+    result["data-content"]
 
     return result
 }
@@ -361,7 +430,7 @@ function CallDirectionFormatter(value, row) {
 
 function CallDispositionFormatter(value, row) {
     var icon
-    if (row.disposition == "NO ANSWER"){
+    if (row.disposition == "NO ANSWER" || row.disposition == "MISSED"){
         icon = "fa fa-reply-all"
     }else if (row.disposition != "ANSWERED"){
         icon = "fa fa-exclamation-triangle"
@@ -370,4 +439,13 @@ function CallDispositionFormatter(value, row) {
     }
 
     return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + value
+}
+
+
+function CallRecordFileFormatter(value, row){
+    if (row.record_file){
+        audio_player = "<audio class='mw-100 mh-100' src='" + row.record_file + "' controls></audio>"
+    } else
+        audio_player = ""
+    return audio_player
 }

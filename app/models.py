@@ -60,3 +60,28 @@ class CallsLog(BaseModel):
     linkedid = db.Column(db.String(32))
     peeraccount = db.Column(db.String(80))
     sequence = db.Column(db.Integer, primary_key=True)
+
+
+class CelLog(BaseModel):
+    __tablename__ = "cel"
+    id = db.Column(db.Integer, primary_key=True)
+    eventtype = db.Column(db.String(80))
+    eventtime = db.Column(db.DateTime, index=True)
+    cid_name = db.Column(db.String(80))
+    cid_num = db.Column(db.String(80))
+    cid_ani = db.Column(db.String(80))
+    cid_rdnis = db.Column(db.String(80))
+    cid_dnid = db.Column(db.String(80))
+    exten = db.Column(db.String(80))
+    context = db.Column(db.String(80), index=True)
+    channame = db.Column(db.String(80))
+    appname = db.Column(db.String(80))
+    appdata = db.Column(db.String(80))
+    amaflags = db.Column(db.Integer)
+    accountcode = db.Column(db.String(20))
+    uniqueid = db.Column(db.String(32), index=True)
+    linkedid = db.Column(db.String(32))
+    peer = db.Column(db.String(80))
+    userdeftype = db.Column(db.String(255))
+    extra = db.Column(db.String(512))
+

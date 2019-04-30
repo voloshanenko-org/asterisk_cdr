@@ -1,5 +1,11 @@
 Bionova PBX call logs viewer
 
+WARNING!
+We use cel table from asteriskcdr db, which haven;t index on eventtime field!
+To speedup queries we need to add INDEX on this field
+
+ALTER TABLE cel ADD KEY eventtime (eventtime)
+
 Local env:
 pip3 install virtualenv
 virtualenv -p python3 venv

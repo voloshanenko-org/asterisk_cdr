@@ -17,6 +17,7 @@ class Config(object):
     DB_NAME_USERS = environ.get('DB_NAME_USERS') or 'asterisk'
     DB_USERNAME = environ.get('DB_USERNAME') or "root"
     DB_PASSWORD = environ.get('DB_PASSWORD')
+    DEBUG = environ.get('DEBUG') or False
 
     SQLALCHEMY_DATABASE_URI = "mysql://{0}:{1}@{2}/{3}".format(DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME_CDR)
     SQLALCHEMY_BINDS = {
@@ -25,3 +26,6 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_POOL_RECYCLE = 600
     SQLALCHEMY_POOL_TIMEOUT = 120
+
+    if DEBUG:
+        SQLALCHEMY_ECHO = True

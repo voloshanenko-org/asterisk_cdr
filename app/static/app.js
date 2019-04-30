@@ -381,7 +381,7 @@ function rowStyle(row, index) {
 function rowAttributes(row, index) {
     var result = {
         'data-toggle': 'popover',
-        'data-placement': 'bottom',
+        'data-placement': 'top',
         'data-trigger': 'hover',
         'data-html': true
     }

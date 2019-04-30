@@ -19,15 +19,15 @@ function checkAuth() {
 
 function setControls(){
 
-    $('#method2_radio').click()
-
-    $('#method1_radio').on("click", function() {
-        LoadCallsData()
-    });
-
-    $('#method2_radio').on("click", function() {
-        LoadCallsData()
-    });
+    // $('#method2_radio').click()
+    //
+    // $('#method1_radio').on("click", function() {
+    //     LoadCallsData()
+    // });
+    //
+    // $('#method2_radio').on("click", function() {
+    //     LoadCallsData()
+    // });
 
     $("#oneday_picker").datetimepicker({
         format: 'L',
@@ -135,14 +135,7 @@ function LoadCallsData() {
     oneday_checked = $('#oneday_radio')[0].checked
     range_checked = $('#range_radio')[0].checked
 
-    method1_checked = $('#method1_radio')[0].checked
-    method2_checked = $('#method2_radio')[0].checked
-
-    if (method1_checked){
-        endpoint = "/_raw_data_old"
-    }else if(method2_checked){
-        endpoint = "/_raw_data"
-    }
+    endpoint = "/_raw_data"
 
     if (oneday_checked) {
         var time_start = $("#time_start_picker").datetimepicker('date').format('HH:mm:00')

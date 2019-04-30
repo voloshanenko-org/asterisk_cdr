@@ -57,30 +57,6 @@ def logout():
     logout_user()
     return redirect(url_for('login'))
 
-@app.route('/_raw_data_old/', methods=['GET'])
-@login_required
-def get_calldata_response_old():
-    date_start = request.args.get("date_start")
-    date_end = request.args.get("date_end")
-
-    try:
-        date_start_obj = datetime.strptime(date_start, '%Y-%m-%d %H:%M:%S')
-        date_end_obj = datetime.strptime(date_end, '%Y-%m-%d %H:%M:%S')
-        try:
-            calls_data_raw = parser.calldata_json_old(date_start=date_start, date_end=date_end)
-            answer = {"result": calls_data_raw}
-        except exc.OperationalError as e:
-            answer = {"error": str(e.orig.args[1])}
-    except ValueError as e:
-        answer = {"error": str("Wrong values passed!")}
-
-    json_response=dumps(answer, default=str)
-    response=Response(json_response,content_type='application/json; charset=utf-8')
-    response.headers.add('content-length',len(json_response))
-    response.status_code=200
-
-    return response
-
 
 @app.route('/_raw_data/', methods=['GET'])
 @login_required

@@ -122,12 +122,12 @@ def calldata_json(date_start, date_end):
 
                 final_data.append(call_data)
 
-        incoming_missed_calls=list(filter(lambda d: d['disposition'] == "MISSED" and d['direction'] == "in" , final_data))
-        outcoming_calls=list(filter(lambda d: d['direction'] == "out" , final_data))
+        incoming_missed_calls=list(filter(lambda d: d['disposition'] == "MISSED" and d['direction'] == "Incoming" , final_data))
+        outcoming_calls=list(filter(lambda d: d['direction'] != "Incoming" , final_data))
 
         #Find if missed call was recalled
         for idx, call in enumerate(final_data):
-            if call['direction'] == "in" and call["disposition"] == "MISSED":
+            if call['direction'] == "Incoming" and call["disposition"] == "MISSED":
                 callback = list(filter(lambda d: d['dst'] in call['src'] and d['calldate'] > call['calldate'], outcoming_calls))
                 if callback:
                     final_data[idx]["callback"] = {
@@ -135,7 +135,7 @@ def calldata_json(date_start, date_end):
                         "src": callback[0]['src'],
                         "before_call": (callback[0]['calldate'] - call['calldate']).total_seconds()
                     }
-            elif call['direction'] == "out":
+            elif call['direction'] == "Outgoing":
                 callback = list(filter(lambda d: call['dst'] in d['src'] and d['calldate'] < call['calldate'], incoming_missed_calls))
                 if callback:
                     final_data[idx]["missed"] = {

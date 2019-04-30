@@ -397,13 +397,13 @@ function rowAttributes(row, index) {
         'data-html': true
     }
 
-    if ("callback" in row && row.direction == "in" && row.disposition == "MISSED") {
+    if ("callback" in row && row.direction == "Incoming" && row.disposition == "MISSED") {
         result["data-content"] = [
                 'Callback at: ' + row.callback.calldate,
                 'By: ' + row.callback.src,
                 'Before callback elapsed: ' + row.callback.before_call + ' seconds'
             ].join('<br>')
-    } else if ("missed" in row && row.direction == "out"){
+    } else if ("missed" in row && (row.direction == "Outgoing" || row.direction == "Internal")){
         result["data-content"] = [
                 'Missed at: ' + row.missed.calldate,
                 'By: ' + row.missed.src,
@@ -435,7 +435,6 @@ function CallDispositionFormatter(value, row) {
     }else {
         icon = ''
     }
-
     return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + value
 }
 

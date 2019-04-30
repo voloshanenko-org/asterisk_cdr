@@ -420,7 +420,7 @@ function CallDirectionFormatter(value, row) {
     var icon
     if (row.direction == "Incoming"){
         icon = "fa fa-sign-in"
-    } else if (row.direction == "out"){
+    } else if (row.direction == "Outgoing"){
         icon = "fa fa-sign-out"
     }
     return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + row.direction

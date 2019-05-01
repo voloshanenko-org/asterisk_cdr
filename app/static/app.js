@@ -39,7 +39,7 @@ function setControls(){
     });
     $("#time_end_picker").datetimepicker({
         format: 'HH:mm',
-        stepping: 30
+        stepping: 30,
     });
 
     $('#oneday_radio').on("click", function() {
@@ -54,6 +54,13 @@ function setControls(){
 
     $("#date_start_picker").on("change.datetimepicker", function (e) {
         $('#date_end_picker').datetimepicker('minDate', e.date);
+
+        var minTime = moment(e.date).toDate();
+        var maxTime = moment(e.date).add(1, 'd').toDate();
+        minTime.setHours(0, 0,0,0)
+        maxTime.setHours(0, 0,0,0)
+        $('#time_start_picker').datetimepicker('minDate', minTime);
+        $('#time_end_picker').datetimepicker('maxDate', maxTime);
     });
     $("#date_end_picker").on("change.datetimepicker", function (e) {
         $('#date_start_picker').datetimepicker('maxDate', e.date);
@@ -73,8 +80,12 @@ function setToday(){
     $("#date_start_picker").datetimepicker('date', moment());
     $("#date_end_picker").datetimepicker('date', moment());
 
-    $("#time_start_picker").datetimepicker('date', "07:00");
-    $("#time_end_picker").datetimepicker('date', "20:00");
+    var timeStart = moment().toDate();
+    var timeEnd = moment().toDate();
+    timeStart.setHours(7, 0,0,0)
+    timeEnd.setHours(20, 0,0,0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
 
     $('#oneday_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
@@ -86,8 +97,12 @@ function setYesterday(){
     $("#date_start_picker").datetimepicker('date', moment());
     $("#date_end_picker").datetimepicker('date', moment());
 
-    $("#time_start_picker").datetimepicker('date', "07:00");
-    $("#time_end_picker").datetimepicker('date', "20:00");
+    var timeStart = moment().subtract(1, 'days').toDate();
+    var timeEnd = moment().subtract(1, 'days').toDate();
+    timeStart.setHours(7, 0,0,0)
+    timeEnd.setHours(20, 0,0,0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
 
     $('#oneday_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
@@ -99,8 +114,12 @@ function setCurrentWeek(){
     $("#date_start_picker").datetimepicker('date', moment().startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment());
 
-    $("#time_start_picker").datetimepicker('date', "07:00");
-    $("#time_end_picker").datetimepicker('date', "20:00");
+    var timeStart = moment().toDate();
+    var timeEnd = moment().toDate();
+    timeStart.setHours(7, 0,0,0)
+    timeEnd.setHours(20, 0,0,0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
 
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
@@ -112,8 +131,12 @@ function setLastWeek(){
     $("#date_start_picker").datetimepicker('date', moment().subtract(1, 'weeks').startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment().subtract(1, 'weeks').endOf('isoWeek'));
 
-    $("#time_start_picker").datetimepicker('date', "07:00");
-    $("#time_end_picker").datetimepicker('date', "20:00");
+    var timeStart = moment().toDate();
+    var timeEnd = moment().toDate();
+    timeStart.setHours(7, 0,0,0)
+    timeEnd.setHours(20, 0,0,0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
 
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
@@ -131,6 +154,10 @@ function LoadCallsData() {
         var time_end = $("#time_end_picker").datetimepicker('date').format('HH:mm:00')
         var oneday =  $("#oneday_picker").datetimepicker('date').format('YYYY-MM-DD')
 
+        // Handle the case for TempusDominos stupid selector
+        if (time_end == "00:00:00"){
+            time_end = "23:59:59"
+        }
         var date_start = oneday + ' ' + time_start
         var date_end = oneday + ' ' + time_end
     }else if(range_checked){
@@ -177,7 +204,7 @@ function GenerateTableData(data){
         }
         updateTable(important_records, all_records)
     }else if ("error" in data){
-        $("#alertbox .modal-title").text("Internal Error");
+        $("#alertbox .modal-title").text("Operational Error");
         $("#alertbox .modal-body").text(data["error"]);
         $('#alertbox').modal();
     }

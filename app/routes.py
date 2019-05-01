@@ -67,6 +67,8 @@ def get_calldata_response():
     try:
         date_start_obj = datetime.strptime(date_start, '%Y-%m-%d %H:%M:%S')
         date_end_obj = datetime.strptime(date_end, '%Y-%m-%d %H:%M:%S')
+        if date_start_obj > date_end_obj:
+            raise ValueError("End date/time can't be lower than start date!")
         try:
             calls_data_raw = parser.calldata_json(date_start=date_start, date_end=date_end)
             answer = {"result": calls_data_raw}

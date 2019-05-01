@@ -2,6 +2,7 @@ FROM python:3.7-alpine
 
 EXPOSE 5000
 
+RUN pip install --upgrade pip
 RUN apk add --update --no-cache mariadb-connector-c-dev \
 	&& apk add --no-cache --virtual .build-deps \
 		mariadb-dev \

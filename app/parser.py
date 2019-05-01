@@ -3,7 +3,6 @@ from sqlalchemy import and_, not_, or_
 from itertools import groupby
 from operator import itemgetter
 from sqlalchemy import exc
-from datetime import datetime
 import json
 import re
 
@@ -22,8 +21,17 @@ def check_user_credentials(username, password):
 
 def raw_calldata(date_start, date_end):
     try:
+        # Get uniq linkedid for calls
+        linkedid_data = CelLog.query \
+            .with_entities(CelLog.linkedid) \
+            .filter(and_(CelLog.eventtime > date_start, CelLog.eventtime < date_end)) \
+            .distinct(CelLog.linkedid) \
+            .order_by(CelLog.linkedid, CelLog.id).all()
+
+        # Retrieve all call data based on linkedid_data.
+        # We don't want to miss call data for call which start at date range but finished later or finished at date range but started before.
         cels = CelLog.query \
-        .filter(and_(CelLog.eventtime > date_start, CelLog.eventtime < date_end)) \
+        .filter(and_(CelLog.linkedid.in_(linkedid_data))) \
         .filter(not_(CelLog.channame.like("%PJSIP/anonymous%"))) \
         .filter(or_(
                     and_(CelLog.eventtype == "BRIDGE_ENTER", CelLog.context.like("macro-dial%"), not_(CelLog.appname == "AppDial")),
@@ -77,6 +85,7 @@ def calldata_json(date_start, date_end):
                         raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
                 elif event["eventtype"] == "APP_START":
                     records.append(event["appdata"].split(",")[0])
+                    temp_num = event["cid_num"]
                 elif event["eventtype"] == "BRIDGE_ENTER":
                     talk_start = event["eventtime"]
                     call_data.setdefault("src", event["cid_num"])
@@ -115,24 +124,20 @@ def calldata_json(date_start, date_end):
                 if not call_start:
                     print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
                     raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
-                elif not call_end:
-                    # Probably call still active. So set call end date as now() and set status as Incall
-                    now = datetime.datetime.now()
-                    if (now - call_start).seconds < 600:
-                        call_data.setdefault("disposition", "Incall...")
-                        call_end = now
-                    else:
-                        print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", End: " + str(call_end))
-                        raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", End: " + str(call_end))
 
-                if talk_start:
-                    call_data.setdefault("waiting_duration",(talk_start - call_start).seconds)
-                    call_data.setdefault("talking_duration",(call_end - talk_start).seconds)
-                    record = [rec for rec in records if "-" + call_data['dst'] + "-" in rec]
-                    if record:
-                        call_data["record_file"] = record[0]
+                if call_end:
+                    if talk_start:
+                        call_data.setdefault("waiting_duration",(talk_start - call_start).seconds)
+                        call_data.setdefault("talking_duration",(call_end - talk_start).seconds)
+                        record = [rec for rec in records if "-" + call_data['dst'] + "-" in rec]
+                        if record:
+                            call_data["record_file"] = record[0]
+                    else:
+                        call_data.setdefault("waiting_duration",(call_end - call_start).seconds)
                 else:
-                    call_data.setdefault("waiting_duration",(call_end - call_start).seconds)
+                    # Call still active. Set status to "Incall"
+                    call_data.setdefault("disposition", "Incall")
+                    call_data.setdefault("src", temp_num)
 
                 final_data.append(call_data)
 

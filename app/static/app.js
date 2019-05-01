@@ -75,6 +75,23 @@ function setControls(){
 
 };
 
+function setLastHour(){
+    $("#oneday_picker").datetimepicker('date', moment());
+    $("#date_start_picker").datetimepicker('date', moment());
+    $("#date_end_picker").datetimepicker('date', moment());
+
+    var timeStart = moment().toDate();
+    var timeEnd = moment().add(1, 'h').toDate();
+    timeStart.setMinutes(0,0,0)
+    timeEnd.setMinutes(0,0,0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
+
+    $('#oneday_radio').click()
+    $('#hide_outgoing_missed_check').prop('checked', true);
+    LoadCallsData()
+}
+
 function setToday(){
     $("#oneday_picker").datetimepicker('date', moment());
     $("#date_start_picker").datetimepicker('date', moment());

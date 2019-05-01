@@ -1,4 +1,4 @@
-from app import parser
+from app import parser, aster
 from json import dumps
 import os
 from datetime import datetime
@@ -84,6 +84,14 @@ def get_calldata_response():
 
     return response
 
+@app.route('/_init_call/', methods=['GET'])
+@login_required
+def init_call_response():
+    to_sip_number = request.args.get("number_to")
+    from_sip_user = current_user.id
+
+    response = ""
+    return response
 
 @app.route('/_record_data/', methods=['GET'])
 @login_required

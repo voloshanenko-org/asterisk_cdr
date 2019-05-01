@@ -3,6 +3,7 @@ from sqlalchemy import and_, not_, or_
 from itertools import groupby
 from operator import itemgetter
 from sqlalchemy import exc
+from datetime import datetime
 import json
 import re
 
@@ -26,7 +27,8 @@ def raw_calldata(date_start, date_end):
         .filter(not_(CelLog.channame.like("%PJSIP/anonymous%"))) \
         .filter(or_(
                     and_(CelLog.eventtype == "BRIDGE_ENTER", CelLog.context.like("macro-dial%"), not_(CelLog.appname == "AppDial")),
-                    and_(CelLog.eventtype == "CHAN_START", not_(CelLog.context == "from-queue"), not_(CelLog.exten == "s")),
+                    and_(CelLog.eventtype == "CHAN_START", not_(CelLog.context == "from-queue"), not_(CelLog.context == "from-pstn"), not_(CelLog.exten == "s")),
+                    and_(CelLog.eventtype == "CHAN_START", CelLog.context == "from-pstn"),
                     and_(CelLog.eventtype == "HANGUP", not_(CelLog.cid_dnid == "")),
                     and_(CelLog.eventtype == "APP_START", CelLog.appname == "MixMonitor")
         )) \
@@ -52,12 +54,13 @@ def calldata_json(date_start, date_end):
             call_end = None
             talk_start = None
 
+            # Set event linkedID
+            call_data.setdefault("linkedid",linked_id)
+
             for event in linked_events:
 
                 # if Start of the call
                 if event["eventtype"] == "CHAN_START":
-                    # Set event linkedID
-                    call_data.setdefault("linkedid",event["linkedid"])
                     call_data.setdefault("calldate",event["eventtime"])
                     # Set call_start data
                     call_start = event["eventtime"]
@@ -70,8 +73,8 @@ def calldata_json(date_start, date_end):
                         call_data.setdefault("src", event["cid_num"])
                         call_data.setdefault("dst", event["exten"])
                     else:
-                        print("Unknown call context: " + event["context"])
-                        raise ValueError(event["context"])
+                        print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
+                        raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
                 elif event["eventtype"] == "APP_START":
                     records.append(event["appdata"].split(",")[0])
                 elif event["eventtype"] == "BRIDGE_ENTER":
@@ -103,14 +106,25 @@ def calldata_json(date_start, date_end):
                         table_call_status = "MISSED"
                     else:
                         table_call_status = call_status
-
                     call_data.setdefault("disposition", table_call_status)
-
                 else:
-                    print("Unknown call eventtype: " + event["eventtype"])
-                    raise ValueError(event["eventtype"])
+                    print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
+                    raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
 
             if call_data:
+                if not call_start:
+                    print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
+                    raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
+                elif not call_end:
+                    # Probably call still active. So set call end date as now() and set status as Incall
+                    now = datetime.datetime.now()
+                    if (now - call_start).seconds < 600:
+                        call_data.setdefault("disposition", "Incall...")
+                        call_end = now
+                    else:
+                        print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", End: " + str(call_end))
+                        raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", End: " + str(call_end))
+
                 if talk_start:
                     call_data.setdefault("waiting_duration",(talk_start - call_start).seconds)
                     call_data.setdefault("talking_duration",(call_end - talk_start).seconds)

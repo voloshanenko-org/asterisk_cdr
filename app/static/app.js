@@ -177,7 +177,7 @@ function GenerateTableData(data){
         }
         updateTable(important_records, all_records)
     }else if ("error" in data){
-        $("#alertbox .modal-title").text("DB Operational Error");
+        $("#alertbox .modal-title").text("Internal Error");
         $("#alertbox .modal-body").text(data["error"]);
         $('#alertbox').modal();
     }
@@ -237,14 +237,14 @@ function updateTable(important_records, all_records){
             "align": "center",
             "sortable": true
         },
-        {
-            "field": "record_file",
-            "title": "Call record",
-            "formatter": "CallRecordFileFormatter",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        }
+        // {
+        //     "field": "record_file",
+        //     "title": "Call record",
+        //     "formatter": "CallRecordFileFormatter",
+        //     "halign": "center",
+        //     "align": "center",
+        //     "sortable": true
+        // }
     ]
     var columns_important = [
         {
@@ -390,7 +390,7 @@ function rowAttributes(row, index) {
         result["data-content"] = [
                 'Callback at: ' + row.callback.calldate,
                 'By: ' + row.callback.src,
-                'Before callback elapsed: ' + row.callback.before_call + ' seconds'
+                'Before callback elapsed: ' + secondsToHms(row.callback.before_call)
             ].join('<br>')
     } else if ("missed" in row && (row.direction == "Outgoing" || row.direction == "Internal")){
         missed_calls = []
@@ -398,7 +398,7 @@ function rowAttributes(row, index) {
             missed_call = [
                 'Missed at: ' + row.missed[call_index].calldate,
                 'By: ' + row.missed[call_index].src,
-                'After call missed elapsed: ' + row.missed[call_index].before_call + ' seconds'
+                'After call missed elapsed: ' + secondsToHms(row.missed[call_index].before_call)
             ].join('<br>')
             missed_calls.push(missed_call)
         }
@@ -434,4 +434,16 @@ function CallRecordFileFormatter(value, row) {
     if (row.record_file) {
         return "<div class='mw-100'><audio class='mw-100' src='" + row.record_file + "' controls></audio></div>"
     }
+}
+
+function secondsToHms(d) {
+    d = Number(d);
+    var h = Math.floor(d / 3600);
+    var m = Math.floor(d % 3600 / 60);
+    var s = Math.floor(d % 3600 % 60);
+
+    var hDisplay = h > 0 ? h + "h:" : "";
+    var mDisplay = m > 0 ? m + "m:" : "";
+    var sDisplay = s + "s";
+    return hDisplay + mDisplay + sDisplay;
 }

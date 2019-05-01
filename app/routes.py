@@ -73,7 +73,7 @@ def get_calldata_response():
         except exc.OperationalError as e:
             answer = {"error": str(e.orig.args[1])}
     except ValueError as e:
-        answer = {"error": str("Wrong values passed!")}
+        answer = {"error": str(e.args[0])}
 
     json_response=dumps(answer, default=str)
     response=Response(json_response,content_type='application/json; charset=utf-8')
@@ -82,6 +82,13 @@ def get_calldata_response():
 
     return response
 
+
+@app.route('/_record_data/', methods=['GET'])
+@login_required
+def get_record_file():
+    record_hash = request.args.get("record_file_id")
+    response = ""
+    return response
 
 # Dummy route to check user auth
 @app.route('/_is_authorized/', methods=['GET'])

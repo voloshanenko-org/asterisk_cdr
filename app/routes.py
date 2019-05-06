@@ -38,7 +38,10 @@ def login():
         password = request.form['password']
         remember_me = checked = 'rememberme_check' in request.form
         if username and password:
-            user, login_passed = parser.check_user_credentials(username, password)
+            try:
+                user, login_passed = parser.check_user_credentials(username, password)
+            except ConnectionError:
+                user, login_passed = None, False
             if not login_passed:
                 flash('Invalid username or password', 'error')
                 return redirect(url_for('login'))
@@ -87,10 +90,18 @@ def get_calldata_response():
 @app.route('/_init_call/', methods=['GET'])
 @login_required
 def init_call_response():
-    to_sip_number = request.args.get("number_to")
     from_sip_user = current_user.id
+    to_sip_number = request.args.get("dstnum")
 
-    response = ""
+    if not from_sip_user or not to_sip_number:
+        call_init_status = '{ "error": "PBX_REQUEST_INVALID" }'
+    else:
+        call_init_status = aster.run_call(from_sip_user, to_sip_number)
+
+    response=Response(call_init_status,content_type='application/json; charset=utf-8')
+    response.headers.add('content-length',len(call_init_status))
+    response.status_code=200
+
     return response
 
 @app.route('/_record_data/', methods=['GET'])

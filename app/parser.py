@@ -5,13 +5,19 @@ from operator import itemgetter
 from sqlalchemy import exc
 import json
 import re
+import timeout_decorator
 
 
+# Limit time for connection Error
+@timeout_decorator.timeout(5, use_signals=False, timeout_exception=ConnectionError)
 def check_user_credentials(username, password):
-    user = User.query\
-        .filter(User.keyword == "secret")\
-        .filter(User.id == username)\
-        .first()
+    try:
+        user = User.query\
+            .filter(User.keyword == "secret")\
+            .filter(User.id == username)\
+            .first()
+    except exc.OperationalError as e:
+        return None, False
 
     if user is None or not user.data == password:
         return None, False
@@ -38,6 +44,7 @@ def raw_calldata(date_start, date_end):
                     and_(CelLog.eventtype == "CHAN_START", not_(CelLog.context == "from-queue"), not_(CelLog.context == "from-pstn"), not_(CelLog.exten == "s")),
                     and_(CelLog.eventtype == "CHAN_START", CelLog.context == "from-pstn"),
                     and_(CelLog.eventtype == "HANGUP", not_(CelLog.cid_dnid == "")),
+                    and_(CelLog.eventtype == "HANGUP", CelLog.context == "from-internal", not_(CelLog.cid_num == CelLog.exten)),
                     and_(CelLog.eventtype == "APP_START", CelLog.appname == "MixMonitor")
         )) \
         .order_by(CelLog.linkedid, CelLog.id).all()
@@ -86,6 +93,10 @@ def calldata_json(date_start, date_end):
                 elif event["eventtype"] == "APP_START":
                     records.append(event["appdata"].split(",")[0])
                     temp_num = event["cid_num"]
+                    temp_start_date = event["eventtime"]
+                    dst_temp_extension_search = re.search('.*/out-([0-9]+)-.*', event["appdata"], re.IGNORECASE)
+                    if dst_temp_extension_search:
+                        temp_dst_num = dst_temp_extension_search.group(1)
                 elif event["eventtype"] == "BRIDGE_ENTER":
                     talk_start = event["eventtime"]
                     call_data.setdefault("src", event["cid_num"])
@@ -97,33 +108,59 @@ def calldata_json(date_start, date_end):
                 # If end of the call
                 elif event["eventtype"] == "HANGUP":
                     # Set call_end data
-                    call_end = event["eventtime"]
-                    call_extra_data = json.loads(event["extra"])
-                    call_status = call_extra_data["dialstatus"]
-                    if event["context"] == "ext-queues":
-                        # Set src/dst for incoming missed call
-                        call_data.setdefault("src", event["cid_num"])
-                    elif event["context"] == "ext-local":
-                        call_data["direction"] = "Internal"
-                    if call_status == "ANSWER":
-                        table_call_status = "ANSWERED"
-                    elif call_status == "CONGESTION":
-                        table_call_status = "MISSED"
-                    elif call_status in ["NOANSWER", "CANCEL"]:
-                        table_call_status = "NO ANSWER"
-                    elif not call_status:
-                        table_call_status = "MISSED"
+                    if event["appdata"] == "(Outgoing Line)" and not "src" in call_data:
+                        call_extra_data = json.loads(event["extra"])
+                        src_extension_search = re.search('PJSIP/(.*)-.*', call_extra_data["hangupsource"], re.IGNORECASE)
+                        if src_extension_search:
+                            call_data.setdefault("src", src_extension_search.group(1))
+                        call_data["direction"] = "Outgoing"
+
+                        call_end = event["eventtime"]
+                        call_extra_data = json.loads(event["extra"])
+                        call_status = call_extra_data["dialstatus"]
                     else:
-                        table_call_status = call_status
-                    call_data.setdefault("disposition", table_call_status)
+                        if event["context"] == "ext-queues":
+                            # Set src/dst for incoming missed call
+                            call_data.setdefault("src", event["cid_num"])
+                        elif event["context"] == "ext-local":
+                            call_data["direction"] = "Internal"
+
+                        call_end = event["eventtime"]
+                        call_extra_data = json.loads(event["extra"])
+                        call_status = call_extra_data["dialstatus"]
                 else:
                     print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
                     raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
 
             if call_data:
+                table_call_status = None
+                if call_status == "ANSWER":
+                    table_call_status = "ANSWERED"
+                elif call_status in ["CONGESTION","NOANSWER", "CANCEL", ""]:
+                    if call_data["direction"] == "Incoming":
+                        table_call_status = "MISSED"
+                    elif call_data["direction"] == "Outgoing":
+                        table_call_status = "NO ANSWER"
+                else:
+                    table_call_status = call_status
+                call_data.setdefault("disposition", table_call_status)
+
+                if not "dst" in call_data and call_data["direction"] == "Outgoing" and temp_dst_num:
+                    if "src" in call_data:
+                        call_data["dst"] = temp_dst_num
+                    else:
+                        continue
+
                 if not call_start:
-                    print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
-                    raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
+                    if "src" in call_data or "dst" in call_data:
+                        if call_data["direction"] == "Outgoing" and temp_start_date:
+                            call_data.setdefault("calldate", temp_start_date)
+                            call_start = temp_start_date
+                        else:
+                            print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
+                            raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
+                    else:
+                        continue
 
                 if call_end:
                     if talk_start:

@@ -11,7 +11,12 @@ class Config(object):
     PERMANENT_SESSION_LIFETIME = environ.get('PERMANENT_SESSION_LIFETIME') or timedelta(hours=8)
     SESSION_PERMANENT = True
 
-    SECRET_KEY = environ.get('SECRET_KEY') or rnd_secret_key
+    if "FLASK_DEBUG" in environ:
+        SECRET_KEY = "DEBUG_SECRET_KEY"
+    else:
+        SECRET_KEY = environ.get('SECRET_KEY') or rnd_secret_key
+
+
     DB_HOST = environ.get('DB_HOST') or '127.0.0.1'
     DB_NAME_CDR = environ.get('DB_NAME_CDR') or 'asteriskcdrdb'
     DB_NAME_USERS = environ.get('DB_NAME_USERS') or 'asterisk'

@@ -82,8 +82,6 @@ def main():
                 print("......Stack ENV variable '" + env_variable + "' found...")
                 stack_env_dict.append({ "name": env_variable, "value": os.environ.get(env_variable)})
 
-        print(stack_env_dict)
-
         stack_create_request = portainer_api.StackCreateRequest(
             name=portainer_stack_name,
             repository_url=git_url,

@@ -13,6 +13,7 @@ from app import app
 def override_url_for():
     return dict(url_for=dated_url_for)
 
+
 def dated_url_for(endpoint, **values):
     if endpoint == 'static':
         filename = values.get('filename', None)
@@ -27,6 +28,7 @@ def dated_url_for(endpoint, **values):
 @login_required
 def index():
     return render_template('resultTable.html')
+
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
@@ -87,6 +89,7 @@ def get_calldata_response():
 
     return response
 
+
 @app.route('/_init_call/', methods=['GET'])
 @login_required
 def init_call_response():
@@ -104,20 +107,23 @@ def init_call_response():
 
     return response
 
+
+@app.route('/_sip_status/', methods=['GET'])
+@login_required
+def sip_status_response():
+    sip_user = current_user.id
+    sip_status = aster.get_sip_status(sip_user)
+
+    response=Response(sip_status,content_type='application/json; charset=utf-8')
+    response.headers.add('content-length',len(sip_status))
+    response.status_code=200
+
+    return response
+
+
 @app.route('/_record_data/', methods=['GET'])
 @login_required
 def get_record_file():
     record_hash = request.args.get("record_file_id")
     response = ""
-    return response
-
-# Dummy route to check user auth
-@app.route('/_is_authorized/', methods=['GET'])
-@login_required
-def is_authorized():
-    status = '{"status": "OK"}'
-    response=Response(status,content_type='application/json; charset=utf-8')
-    response.headers.add('content-length',len(status))
-    response.status_code=200
-
     return response

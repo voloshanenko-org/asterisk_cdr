@@ -2,16 +2,37 @@ $(window).on('load', function(){
     if (window.location.pathname != "/login") {
         setControls();
         setToday();
-        // Schedule first auth check in 1 minute after load
-        setTimeout(checkAuth, 60*1000);
+        // Execute first SIP status check, which also will act as auth check
+        checkSipStatus()
     }
 });
 
-function checkAuth() {
-    $.getJSON($SCRIPT_ROOT + '/_is_authorized', {
+function checkSipStatus() {
+    $.getJSON($SCRIPT_ROOT + '/_sip_status', {
     }).done(function(data) {
-        // Schedule next auth check in 1 minute
-        setTimeout(checkAuth, 60*1000);
+        // Schedule next sip_status check in 1 minute
+        setTimeout(checkSipStatus, 15*1000);
+
+        if ("error" in data){
+            status_title = "Offline"
+            status_details = data["error"]
+            status_dot_class = "dot dot-lg dot-danger"
+        } else if ("status" in data){
+            status_title = "Online"
+            status_details = data["status"]
+            if (status_details == "In use"){
+                status_dot_class = "dot dot-lg dot-warning"
+            }else if (status_details == "Not in use"){
+                status_dot_class = "dot dot-lg dot-success"
+            }
+        }
+
+        $("#sip_status_label").text(status_title);
+        $("#sip_status_label").attr("title", status_details);
+        $("#sip_status_dot").attr("class", status_dot_class);
+        $("#sip_status_dot").attr("title", status_details);
+
+        console.log(data)
     }).fail(function(data){
         window.location.replace("/login");
     });

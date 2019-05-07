@@ -8,8 +8,12 @@ services:
     - "5000:5000"
     environment:
     - DB_HOST=${DB_HOST}
-    - DB_NAME=${DB_NAME}
+    - DB_NAME_CDR=${DB_NAME_CDR}
+    - DB_NAME_USERS=${DB_NAME_USERS}
     - DB_USERNAME=${DB_USERNAME}
     - DB_PASSWORD=${DB_PASSWORD}
+    - ASTERISK_HOST=${ASTERISK_HOST}
+    - ASTERISK_AMI_USERNAME=${ASTERISK_AMI_USERNAME}
+    - ASTERISK_AMI_PASSWORD=${ASTERISK_AMI_PASSWORD}  
     volumes:
       - .:/app

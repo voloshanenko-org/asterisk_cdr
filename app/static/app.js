@@ -32,9 +32,10 @@ function checkSipStatus() {
         $("#sip_status_dot").attr("class", status_dot_class);
         $("#sip_status_dot").attr("title", status_details);
 
-        console.log(data)
     }).fail(function(data){
-        window.location.replace("/login");
+        if (data.status != 500){
+            window.location.replace("/login");
+        }
     });
 }
 
@@ -152,13 +153,17 @@ function setCurrentWeek(){
     $("#date_start_picker").datetimepicker('date', moment().startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment());
 
-    var timeStart = moment().toDate();
-    var timeEnd = moment().toDate();
-    timeStart.setHours(7, 0,0,0)
-    timeEnd.setHours(20, 0,0,0)
-    $("#time_start_picker").datetimepicker('date', timeStart);
-    $("#time_end_picker").datetimepicker('date', timeEnd);
-
+    try {
+        var timeStart = moment().toDate();
+        var timeEnd = moment().toDate();
+        timeStart.setHours(7, 0, 0, 0)
+        timeEnd.setHours(20, 0, 0, 0)
+        $("#time_start_picker").datetimepicker('date', timeStart);
+        $("#time_end_picker").datetimepicker('date', timeEnd);
+    } catch (e) {
+        // execution continues here when an error was thrown. You can also inspect the `ex`ception object
+    }
+    
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
     LoadCallsData()
@@ -169,13 +174,16 @@ function setLastWeek(){
     $("#date_start_picker").datetimepicker('date', moment().subtract(1, 'weeks').startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment().subtract(1, 'weeks').endOf('isoWeek'));
 
-    var timeStart = moment().toDate();
-    var timeEnd = moment().toDate();
-    timeStart.setHours(7, 0,0,0)
-    timeEnd.setHours(20, 0,0,0)
-    $("#time_start_picker").datetimepicker('date', timeStart);
-    $("#time_end_picker").datetimepicker('date', timeEnd);
-
+    try {
+        var timeStart = moment().toDate();
+        var timeEnd = moment().toDate();
+        timeStart.setHours(7, 0, 0, 0)
+        timeEnd.setHours(20, 0, 0, 0)
+        $("#time_start_picker").datetimepicker('date', timeStart);
+        $("#time_end_picker").datetimepicker('date', timeEnd);
+    } catch (e) {
+        // execution continues here when an error was thrown. You can also inspect the `ex`ception object
+    }
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
     LoadCallsData()

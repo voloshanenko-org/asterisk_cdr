@@ -31,7 +31,7 @@ def get_asterisk_client():
     except Exception as e:
         raise ValueError('{"error": "PBX_NOT_AVAILABLE"  }')
 
-    if login_request.response.is_error():
+    if not login_request.response or login_request.response.is_error():
         asterisk_client.logoff()
         raise ValueError('{"error": "PBX_AUTH_FAILED"  }')
 
@@ -55,7 +55,7 @@ def get_sip_status(sip_extension):
         event_listener, white_list=['EndpointDetail','EndpointDetailComplete']
     )
 
-    sip_extension_status_request = ami_client.send_action(sip_extension_status_action, callback=None)
+    ami_client.send_action(sip_extension_status_action, callback=None)
 
     time_limit = 1
     time_past = 0
@@ -76,6 +76,42 @@ def get_sip_status(sip_extension):
         return '{"error": "SIP_STATUS_TIMEOUT"}'
 
 
+def get_all_sip_status():
+    try:
+        ami_client=get_asterisk_client()
+    except ValueError as e:
+        return e.args[0]
+
+    random_id = ''.join(SystemRandom().choice(ascii_uppercase + digits) for _ in range(12))
+    all_sip_status_action = SimpleAction(
+        'PJSIPShowEndpoints',
+        ActionID = random_id
+    )
+
+    ami_client.add_event_listener(
+        event_listener, white_list=['EndpointList','EndpointListComplete']
+    )
+
+    ami_client.send_action(all_sip_status_action, callback=None)
+
+    time_limit = 30
+    time_past = 0
+
+    while time_past < time_limit:
+        if random_id in GLOBAL_SIP_STATUS_TABLE and any("status" in d for d in GLOBAL_SIP_STATUS_TABLE[random_id]):
+            all_sip_data = GLOBAL_SIP_STATUS_TABLE[random_id]
+            final_sip_status = []
+            for sip_data in all_sip_data:
+                final_sip_status.append(sip_data)
+            GLOBAL_SIP_STATUS_TABLE.pop(random_id)
+            return final_sip_status
+        else:
+            time_past += 0.1
+            sleep(0.1)
+
+    if not random_id not in GLOBAL_SIP_STATUS_TABLE:
+        return '{"error": "SIP_STATUS_TIMEOUT"}'
+
 
 def event_listener(event,**kwargs):
 
@@ -83,6 +119,13 @@ def event_listener(event,**kwargs):
         GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]] = { event.keys["ObjectName"] : event["DeviceState"] }
     elif event == "EndpointDetailComplete":
         pass
+    elif event.name == "EndpointList":
+        if not event.keys["ActionID"] in GLOBAL_SIP_STATUS_TABLE:
+            GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]] = []
+        if not event.keys["ObjectName"] == "anonymous":
+            GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]].append({ "id": event.keys["ObjectName"], "device_state" : event["DeviceState"] })
+    elif event.name == "EndpointListComplete":
+        GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]].append({ "status" : event["EventList"] })
 
 def run_call(ext, to):
     try:

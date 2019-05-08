@@ -121,6 +121,19 @@ def sip_status_response():
     return response
 
 
+@app.route('/_all_sip_status/', methods=['GET'])
+@login_required
+def all_sip_status_response():
+    all_sip_status = aster.get_all_sip_status()
+
+    json_response=dumps(all_sip_status, default=str)
+    response=Response(json_response,content_type='application/json; charset=utf-8')
+    response.headers.add('content-length',len(json_response))
+    response.status_code=200
+
+    return response
+
+
 @app.route('/_record_data/', methods=['GET'])
 @login_required
 def get_record_file():

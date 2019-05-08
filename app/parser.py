@@ -178,7 +178,7 @@ def calldata_json(date_start, date_end):
 
                 final_data.append(call_data)
 
-        outcoming_calls=list(filter(lambda d: d['direction'] != "Incoming" , final_data))
+        outcoming_calls=list(filter(lambda d: d['direction'] != "Incoming" and d['disposition'] == "ANSWERED", final_data))
         #Find if missed call was recalled
         for idx, call in enumerate(final_data):
             if call['direction'] == "Incoming" and call["disposition"] == "MISSED":
@@ -194,7 +194,7 @@ def calldata_json(date_start, date_end):
         incoming_missed_callback_calls=list(filter(lambda d: d['disposition'] == "MISSED" and d['direction'] == "Incoming" , final_data))
         #Add information about missed calls to outgoing
         for idx, call in enumerate(final_data):
-            if call['direction'] == "Outgoing":
+            if call['direction'] == "Outgoing" and call['disposition'] == "ANSWERED":
                 missed_calls = list(filter(lambda d: call['dst'] in d['src']
                                                and d['calldate'] < call['calldate']
                                                and d['callback']['linkedid'] == call['linkedid'] , incoming_missed_callback_calls))

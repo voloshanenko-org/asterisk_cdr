@@ -222,6 +222,13 @@ def calldata_json(date_start, date_end):
 
                 final_data.append(call_data)
 
+        # Replace +38 prefix if exist in src num for incoming calls
+        for idx, call in enumerate(final_data):
+            if call['direction'] == "Incoming":
+                src_tel = re.search('38(.*)', call["src"], re.IGNORECASE)
+                if src_tel:
+                    final_data[idx]["src"] = src_tel.group(1)
+
         outcoming_calls=list(filter(lambda d: d['direction'] != "Incoming" and d['disposition'] == "ANSWERED", final_data))
         #Find if missed call was recalled
         for idx, call in enumerate(final_data):

@@ -29,6 +29,7 @@ def get_asterisk_client():
     try:
         login_request = asterisk_client.login(username=asterisk_ami_username, secret=asterisk_ami_password)
     except Exception as e:
+        asterisk_client.logoff()
         raise ValueError('{"error": "PBX_NOT_AVAILABLE"  }')
 
     if not login_request.response or login_request.response.is_error():
@@ -65,6 +66,7 @@ def get_sip_status(sip_extension):
             time_past += 0.1
             sleep(0.1)
         else:
+            ami_client.logoff()
             sip_status = GLOBAL_SIP_STATUS_TABLE[random_id][sip_extension]
             GLOBAL_SIP_STATUS_TABLE.pop(random_id)
             if sip_status in ["Unavailable"]:
@@ -73,6 +75,7 @@ def get_sip_status(sip_extension):
                 return '{"status": "' + sip_status + '"}'
 
     if not random_id not in GLOBAL_SIP_STATUS_TABLE:
+        ami_client.logoff()
         return '{"error": "SIP_STATUS_TIMEOUT"}'
 
 
@@ -99,6 +102,7 @@ def get_all_sip_status():
 
     while time_past < time_limit:
         if random_id in GLOBAL_SIP_STATUS_TABLE and any("status" in d for d in GLOBAL_SIP_STATUS_TABLE[random_id]):
+            ami_client.logoff()
             all_sip_data = GLOBAL_SIP_STATUS_TABLE[random_id]
             final_sip_status = []
             for sip_data in all_sip_data:
@@ -110,6 +114,7 @@ def get_all_sip_status():
             sleep(0.1)
 
     if not random_id not in GLOBAL_SIP_STATUS_TABLE:
+        ami_client.logoff()
         return '{"error": "SIP_STATUS_TIMEOUT"}'
 
 
@@ -155,4 +160,3 @@ def run_call(ext, to):
     else:
         ami_client.logoff()
         return call_init_request.response
-

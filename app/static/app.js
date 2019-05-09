@@ -42,17 +42,17 @@ function checkSipStatus() {
 function setControls(){
     $("#oneday_picker").datetimepicker({
         format: 'L',
-        MaxDate: '0'
+        MaxDate: moment()
     });
 
     $("#date_start_picker").datetimepicker({
         format: 'L',
-        MaxDate: '0'
+        MaxDate: moment()
     });
 
     $("#date_end_picker").datetimepicker({
         format: 'L',
-        MaxDate: '0'
+        MaxDate: moment()
     });
 
     $("#time_start_picker").datetimepicker({
@@ -82,7 +82,12 @@ function setControls(){
         minTime.setHours(0, 0,0,0)
         maxTime.setHours(0, 0,0,0)
         $('#time_start_picker').datetimepicker('minDate', minTime);
-        $('#time_end_picker').datetimepicker('maxDate', maxTime);
+        try {
+            $('#time_end_picker').datetimepicker('maxDate', maxTime);
+        } catch (e) {
+            $('#time_end_picker').datetimepicker('minDate', minTime);
+            $('#time_end_picker').datetimepicker('maxDate', maxTime);
+        }
     });
     $("#date_end_picker").on("change.datetimepicker", function (e) {
         $('#date_start_picker').datetimepicker('maxDate', e.date);
@@ -153,17 +158,13 @@ function setCurrentWeek(){
     $("#date_start_picker").datetimepicker('date', moment().startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment());
 
-    try {
-        var timeStart = moment().toDate();
-        var timeEnd = moment().toDate();
-        timeStart.setHours(7, 0, 0, 0)
-        timeEnd.setHours(20, 0, 0, 0)
-        $("#time_start_picker").datetimepicker('date', timeStart);
-        $("#time_end_picker").datetimepicker('date', timeEnd);
-    } catch (e) {
-        // execution continues here when an error was thrown. You can also inspect the `ex`ception object
-    }
-    
+    var timeStart = moment().toDate();
+    var timeEnd = moment().toDate();
+    timeStart.setHours(7, 0, 0, 0)
+    timeEnd.setHours(20, 0, 0, 0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
+
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
     LoadCallsData()
@@ -174,16 +175,13 @@ function setLastWeek(){
     $("#date_start_picker").datetimepicker('date', moment().subtract(1, 'weeks').startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment().subtract(1, 'weeks').endOf('isoWeek'));
 
-    try {
-        var timeStart = moment().toDate();
-        var timeEnd = moment().toDate();
-        timeStart.setHours(7, 0, 0, 0)
-        timeEnd.setHours(20, 0, 0, 0)
-        $("#time_start_picker").datetimepicker('date', timeStart);
-        $("#time_end_picker").datetimepicker('date', timeEnd);
-    } catch (e) {
-        // execution continues here when an error was thrown. You can also inspect the `ex`ception object
-    }
+    var timeStart = moment().toDate();
+    var timeEnd = moment().toDate();
+    timeStart.setHours(7, 0, 0, 0)
+    timeEnd.setHours(20, 0, 0, 0)
+    $("#time_start_picker").datetimepicker('date', timeStart);
+    $("#time_end_picker").datetimepicker('date', timeEnd);
+
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
     LoadCallsData()

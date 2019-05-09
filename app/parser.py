@@ -6,6 +6,39 @@ from sqlalchemy import exc
 import json
 import re
 import timeout_decorator
+from app import app
+
+
+from sqlalchemy.engine.default import DefaultDialect
+from sqlalchemy.sql.sqltypes import String, DateTime, NullType
+
+
+class StringLiteral(String):
+    """Teach SA how to literalize various things."""
+    def literal_processor(self, dialect):
+        super_processor = super(StringLiteral, self).literal_processor(dialect)
+
+        def process(value):
+            if isinstance(value, int):
+                return str(value)
+            if not isinstance(value, str):
+                value = str(value)
+            result = super_processor(value)
+            if isinstance(result, bytes):
+                result = result.decode(dialect.encoding)
+            return result
+        return process
+
+
+class LiteralDialect(DefaultDialect):
+    colspecs = {
+        # prevent various encoding explosions
+        String: StringLiteral,
+        # teach SA about how to literalize a datetime
+        DateTime: StringLiteral,
+        # don't format py2 long integers to NULL
+        NullType: StringLiteral,
+    }
 
 
 # Limit time for connection Error
@@ -36,18 +69,27 @@ def raw_calldata(date_start, date_end):
 
         # Retrieve all call data based on linkedid_data.
         # We don't want to miss call data for call which start at date range but finished later or finished at date range but started before.
-        cels = CelLog.query \
+        cels_query = CelLog.query \
         .filter(and_(CelLog.linkedid.in_(linkedid_data))) \
         .filter(not_(CelLog.channame.like("%PJSIP/anonymous%"))) \
         .filter(or_(
                     and_(CelLog.eventtype == "BRIDGE_ENTER", CelLog.context.like("macro-dial%"), not_(CelLog.appname == "AppDial")),
                     and_(CelLog.eventtype == "CHAN_START", not_(CelLog.context == "from-queue"), not_(CelLog.context == "from-pstn"), not_(CelLog.exten == "s")),
                     and_(CelLog.eventtype == "CHAN_START", CelLog.context == "from-pstn"),
+                    and_(CelLog.eventtype == "APP_START", CelLog.appname == "MixMonitor"),
+                    CelLog.eventtype == "ANSWER",
                     and_(CelLog.eventtype == "HANGUP", not_(CelLog.cid_dnid == "")),
-                    and_(CelLog.eventtype == "HANGUP", CelLog.context == "from-internal", not_(CelLog.cid_num == CelLog.exten)),
-                    and_(CelLog.eventtype == "APP_START", CelLog.appname == "MixMonitor")
+                    and_(CelLog.eventtype == "HANGUP", CelLog.context == "from-internal", not_(CelLog.cid_num == CelLog.exten))
         )) \
-        .order_by(CelLog.linkedid, CelLog.id).all()
+        .order_by(CelLog.linkedid, CelLog.id)
+        if app.config["FLASK_DEBUG"] == "1":
+            statement = cels_query.statement
+            raw_text_sql=statement.compile(
+                dialect=LiteralDialect(),
+                compile_kwargs={'literal_binds': True},
+            ).string
+            print("SQL: " + raw_text_sql)
+        cels = cels_query.all()
     except exc.OperationalError as e:
         raise
 
@@ -97,6 +139,8 @@ def calldata_json(date_start, date_end):
                     dst_temp_extension_search = re.search('.*/out-([0-9]+)-.*', event["appdata"], re.IGNORECASE)
                     if dst_temp_extension_search:
                         temp_dst_num = dst_temp_extension_search.group(1)
+                elif event["eventtype"] == "ANSWER":
+                    temp_num = event["cid_num"]
                 elif event["eventtype"] == "BRIDGE_ENTER":
                     talk_start = event["eventtime"]
                     call_data.setdefault("src", event["cid_num"])

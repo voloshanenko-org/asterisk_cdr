@@ -76,18 +76,6 @@ function setControls(){
 
     $("#date_start_picker").on("change.datetimepicker", function (e) {
         $('#date_end_picker').datetimepicker('minDate', e.date);
-
-        var minTime = moment(e.date).toDate();
-        var maxTime = moment(e.date).add(1, 'd').toDate();
-        minTime.setHours(0, 0,0,0)
-        maxTime.setHours(0, 0,0,0)
-        $('#time_start_picker').datetimepicker('minDate', minTime);
-        try {
-            $('#time_end_picker').datetimepicker('maxDate', maxTime);
-        } catch (e) {
-            $('#time_end_picker').datetimepicker('minDate', minTime);
-            $('#time_end_picker').datetimepicker('maxDate', maxTime);
-        }
     });
     $("#date_end_picker").on("change.datetimepicker", function (e) {
         $('#date_start_picker').datetimepicker('maxDate', e.date);

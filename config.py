@@ -27,7 +27,7 @@ class Config(object):
     ASTERISK_AMI_USERNAME = environ.get('ASTERISK_AMI_USERNAME') or None
     ASTERISK_AMI_PASSWORD = environ.get('ASTERISK_AMI_PASSWORD') or None
 
-    DEBUG = environ.get('DEBUG') or False
+    FLASK_DEBUG = environ.get('FLASK_DEBUG') or "0"
 
     SQLALCHEMY_DATABASE_URI = "mysql://{0}:{1}@{2}/{3}".format(DB_USERNAME, DB_PASSWORD, DB_HOST, DB_NAME_CDR)
     SQLALCHEMY_BINDS = {
@@ -36,6 +36,3 @@ class Config(object):
     SQLALCHEMY_TRACK_MODIFICATIONS = False
     SQLALCHEMY_POOL_RECYCLE = 600
     SQLALCHEMY_POOL_TIMEOUT = 120
-
-    if DEBUG:
-        SQLALCHEMY_ECHO = True

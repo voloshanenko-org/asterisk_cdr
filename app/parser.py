@@ -6,6 +6,7 @@ from sqlalchemy import exc
 import json
 import re
 import timeout_decorator
+import time
 from app import app
 
 
@@ -60,17 +61,30 @@ def check_user_credentials(username, password):
 
 def raw_calldata(date_start, date_end):
     try:
+        DEBUG = app.config["FLASK_DEBUG"]
+
+        if DEBUG:
+            start_time = time.time()
+
         # Get uniq linkedid for calls
-        linkedid_data = CelLog.query \
+        linkedid_query = CelLog.query \
             .with_entities(CelLog.linkedid) \
             .filter(and_(CelLog.eventtime > date_start, CelLog.eventtime < date_end)) \
+            .filter(not_(CelLog.channame.like("%PJSIP/anonymous%"))) \
             .distinct(CelLog.linkedid) \
-            .order_by(CelLog.linkedid, CelLog.id).all()
+            .order_by(CelLog.linkedid, CelLog.id)
+
+        linkedid_data = linkedid_query.all()
+
+        linkedid_data_filtered = []
+        for l in linkedid_data:
+            linkedid_data_filtered.append(l.linkedid.replace("'", ""))
+
 
         # Retrieve all call data based on linkedid_data.
         # We don't want to miss call data for call which start at date range but finished later or finished at date range but started before.
         cels_query = CelLog.query \
-        .filter(and_(CelLog.linkedid.in_(linkedid_data))) \
+        .filter(and_(CelLog.linkedid.in_(linkedid_data_filtered))) \
         .filter(not_(CelLog.channame.like("%PJSIP/anonymous%"))) \
         .filter(or_(
                     and_(CelLog.eventtype == "BRIDGE_ENTER", CelLog.context.like("macro-dial%"), not_(CelLog.appname == "AppDial")),
@@ -82,24 +96,49 @@ def raw_calldata(date_start, date_end):
                     and_(CelLog.eventtype == "HANGUP", CelLog.context == "from-internal", not_(CelLog.cid_num == CelLog.exten))
         )) \
         .order_by(CelLog.linkedid, CelLog.id)
-        if app.config["FLASK_DEBUG"] == "1":
+        cels = cels_query.all()
+
+        if DEBUG == "1":
+            statement = linkedid_query.statement
+            raw_text_sql=statement.compile(
+                dialect=LiteralDialect(),
+                compile_kwargs={'literal_binds': True},
+            ).string
+            #print("LinkedID SQL: " + raw_text_sql)
+
             statement = cels_query.statement
             raw_text_sql=statement.compile(
                 dialect=LiteralDialect(),
                 compile_kwargs={'literal_binds': True},
             ).string
-            print("SQL: " + raw_text_sql)
-        cels = cels_query.all()
+            #print("Calls data SQL: " + raw_text_sql)
+
+            print("--- SQL execution time %s seconds ---" % (time.time() - start_time))
+
     except exc.OperationalError as e:
         raise
 
+    if DEBUG:
+        start_time = time.time()
+
     grouped_calls_data = {k:list(v) for k,v in groupby(cels,key=itemgetter("linkedid"))}
+
+    if DEBUG:
+        print("--- Data grouping execution time %s seconds ---" % (time.time() - start_time))
+
     return grouped_calls_data
 
 
 def calldata_json(date_start, date_end):
 
+
+
     try:
+        DEBUG = app.config["FLASK_DEBUG"]
+
+        if DEBUG:
+            start_time = time.time()
+
         grouped_cels_data = raw_calldata(date_start, date_end)
         final_data = []
 
@@ -259,6 +298,9 @@ def calldata_json(date_start, date_end):
                         }
                         missed_calls_array.append(missed_data)
                     final_data[idx]["missed"] = missed_calls_array
+
+        if DEBUG:
+            print("--- Data parsing execution time %s seconds ---" % (time.time() - start_time))
 
     except exc.OperationalError as e:
         raise

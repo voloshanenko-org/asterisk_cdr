@@ -142,16 +142,9 @@ function setYesterday(){
 }
 
 function setCurrentWeek(){
-    $("#oneday_picker").datetimepicker('date', moment());
-    $("#date_start_picker").datetimepicker('date', moment().startOf('isoWeek'));
+    // Order of date range important
     $("#date_end_picker").datetimepicker('date', moment());
-
-    var timeStart = moment().toDate();
-    var timeEnd = moment().toDate();
-    timeStart.setHours(7, 0, 0, 0)
-    timeEnd.setHours(20, 0, 0, 0)
-    $("#time_start_picker").datetimepicker('date', timeStart);
-    $("#time_end_picker").datetimepicker('date', timeEnd);
+    $("#date_start_picker").datetimepicker('date', moment().startOf('isoWeek'));
 
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);
@@ -159,16 +152,8 @@ function setCurrentWeek(){
 }
 
 function setLastWeek(){
-    $("#oneday_picker").datetimepicker('date', moment());
     $("#date_start_picker").datetimepicker('date', moment().subtract(1, 'weeks').startOf('isoWeek'));
     $("#date_end_picker").datetimepicker('date', moment().subtract(1, 'weeks').endOf('isoWeek'));
-
-    var timeStart = moment().toDate();
-    var timeEnd = moment().toDate();
-    timeStart.setHours(7, 0, 0, 0)
-    timeEnd.setHours(20, 0, 0, 0)
-    $("#time_start_picker").datetimepicker('date', timeStart);
-    $("#time_end_picker").datetimepicker('date', timeEnd);
 
     $('#range_radio').click()
     $('#hide_outgoing_missed_check').prop('checked', true);

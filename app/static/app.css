@@ -25,6 +25,10 @@ audio
     height:20px;
 }
 
+.popover {
+    pointer-events: none;
+}
+
 body {
     padding: 40px;
 }

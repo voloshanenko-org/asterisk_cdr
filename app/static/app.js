@@ -205,7 +205,6 @@ function LoadCallsData() {
 };
 
 function GenerateTableData(data){
-
     if("result" in data){
         $('#alertbox').modal('hide');
 
@@ -358,7 +357,7 @@ function updateTable(important_records, all_records){
         }
      });
 
-    $('#all-records-table').on('all.bs.table', function (e) {
+    $('#all-records-table').on('post-body.bs.table', function (e) {
         $('[data-toggle="popover"]').popover()
     })
 
@@ -440,7 +439,7 @@ function rowStyle(row, index) {
 function rowAttributes(row, index) {
     var result = {
         'data-toggle': 'popover',
-        'data-placement': 'top',
+        'data-placement': 'bottom',
         'data-trigger': 'hover',
         'data-html': true
     }

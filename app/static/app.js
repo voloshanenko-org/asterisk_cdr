@@ -200,6 +200,9 @@ function LoadCallsData() {
     $('#all-records-table').bootstrapTable('removeAll')
     $('#important-records-table').bootstrapTable('removeAll')
 
+    //Show loading spinner
+    $('#loadingspinner').modal('show');
+
     $.getJSON($SCRIPT_ROOT + endpoint, {
         date_start: date_start,
         date_end: date_end
@@ -401,8 +404,20 @@ function updateTable(important_records, all_records){
 
     $('#important-records-table').bootstrapTable('load', important_records);
 
-    $("#loadingspinner").modal('hide');
+    //Hide loading spinner
+    setTimeout(hideSpinnerLoading, 250)
 };
+
+
+function hideSpinnerLoading() {
+    if ($('#loadingspinner').hasClass('show')){
+        $('#loadingspinner').modal('hide');
+    }else{
+        $('#loadingspinner').on('shown.bs.modal', function (e) {
+            $('#loadingspinner').modal('hide');
+        })
+    }
+}
 
 function doOnMsoNumberFormat(cell, row, col){
     var result = "";

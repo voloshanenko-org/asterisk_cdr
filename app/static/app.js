@@ -195,9 +195,9 @@ function LoadCallsData() {
         GenerateTableData(data)
     }).fail(function(data){
         if (data.status != 200){
-            $("#alertbox .modal-title").text(data.statusText);
-            $("#alertbox .modal-body").text(data.status + ': Please contact support to fix it!');
-            $('#alertbox').modal();
+            error_message = "Error " + data.status + ". " + data.statusText
+            setTimeout(hideSpinnerLoading, 500)
+            setTimeout(showToastr("error", error_message), 600)
         }else{
             window.location.replace("/login");
         }
@@ -206,8 +206,6 @@ function LoadCallsData() {
 
 function GenerateTableData(data){
     if("result" in data){
-        $('#alertbox').modal('hide');
-
         var all_records = data["result"]
         hide_outgoing_missed = $('#hide_outgoing_missed_check')[0].checked
 
@@ -223,9 +221,9 @@ function GenerateTableData(data){
         }
         updateTable(important_records, all_records)
     }else if ("error" in data){
-        $("#alertbox .modal-title").text("Operational Error");
-        $("#alertbox .modal-body").text(data["error"]);
-        $('#alertbox').modal();
+        error_message = "Operational error. " + data["error"]
+        setTimeout(hideSpinnerLoading, 500)
+        setTimeout(showToastr("error", error_message), 600)
     }
 }
 
@@ -389,7 +387,49 @@ function updateTable(important_records, all_records){
     $('#important-records-table').bootstrapTable('load', important_records);
 
     //Hide loading spinner
-    setTimeout(hideSpinnerLoading, 250)
+    setTimeout(hideSpinnerLoading, 500)
+    setTimeout(showToastr("success", "Report updated"), 600)
+};
+
+
+function showToastr(toastr_type, toastr_message){
+    if (toastr_type=="success"){
+        toastr.options = {
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "1000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+    }else if(toastr_type=="error"){
+        toastr.options = {
+            "closeButton": true,
+            "debug": false,
+            "newestOnTop": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "0",
+            "extendedTimeOut": "0",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+    }
+
+    toastr[toastr_type](toastr_message)
 };
 
 
@@ -425,7 +465,7 @@ function rowStyle(row, index) {
             css_class = "alert-danger"
         }
     } else if (row.disposition == "NO ANSWER") {
-        css_class = "alert alert-warning"
+        css_class = "alert-warning"
     } else {
         css_class = "alert-secondary"
     }

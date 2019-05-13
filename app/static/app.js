@@ -288,7 +288,15 @@ function updateTable(important_records, all_records){
         //     "halign": "center",
         //     "align": "center",
         //     "sortable": true
-        // }
+        // },
+        {
+            "field": "call_action",
+            "title": "Call",
+            "formatter": "CallActionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": false
+        }
     ]
     var columns_important = [
         {
@@ -334,6 +342,14 @@ function updateTable(important_records, all_records){
             "halign": "center",
             "align": "center",
             "sortable": true
+        },
+        {
+            "field": "call_action",
+            "title": "Call",
+            "formatter": "CallActionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": false
         }
     ]
 
@@ -391,6 +407,9 @@ function updateTable(important_records, all_records){
     setTimeout(showToastr("success", "Report updated"), 600)
 };
 
+function initCall(call_num){
+    showToastr("error", "Для любителей поклацать кнопки и не ждать анонса! :)")
+}
 
 function showToastr(toastr_type, toastr_message){
     if (toastr_type=="success"){
@@ -432,7 +451,6 @@ function showToastr(toastr_type, toastr_message){
     toastr[toastr_type](toastr_message)
 };
 
-
 function hideSpinnerLoading() {
     if ($('#loadingspinner').hasClass('show')){
         $('#loadingspinner').modal('hide');
@@ -472,7 +490,7 @@ function rowStyle(row, index) {
 
     return {
         classes: css_class,
-        css: {"font-size": "13px", "padding": ".2rem"}
+        css: {"font-size": "13px", "padding": ".2rem", "overflow-x": "visible !important", "overflow-y": "visible !important"}
     };
 }
 
@@ -526,6 +544,29 @@ function CallDispositionFormatter(value, row) {
         icon = ''
     }
     return '<i class="' + icon + '" aria-hidden="true" style="font-size:20px"></i> ' + value
+}
+
+function CallActionFormatter(value, row){
+
+    if (row.direction == "Incoming"){
+        call_to_num = row.src
+    }else if (row.direction == "Outgoing"){
+        call_to_num = row.dst
+    }
+
+    my_number = $("#username").attr("value")
+
+    if (call_to_num!=my_number){
+        call_action_html =
+            '<div class="dropdown">' +
+            '  <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+            '  <i class="fa fa-phone" aria-hidden="true"></i>' +
+            '  </button>' +
+            '  <div class="dropdown-menu" aria-labelledby="dropdownMenu">' +
+            '    <button class=\"dropdown-item\" type="button" onclick="initCall(call_to_num);">Call to ' + call_to_num + '</button>' +
+            '  </div>'
+        return call_action_html
+    }
 }
 
 function CallRecordFileFormatter(value, row) {

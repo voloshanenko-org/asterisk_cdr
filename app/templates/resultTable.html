@@ -23,9 +23,8 @@
                 <div id="sip_status_dot" class='dot dot-lg dot-danger' data-toggle="tooltip" title="Offline"></div>
             </div>
 
-
             <div class="col-md-1" align="center">
-                <a href="{{ url_for('logout') }}" class="badge badge-light">User: <h5>{{ current_user.id }}
+                <a href="{{ url_for('logout') }}" id="username" value="{{ current_user.id }}" class="badge badge-light">User: <h5>{{ current_user.id }}
                     <i class="fa fa-times-circle" aria-hidden="true"></i></h5>
                 </a>
             </div>

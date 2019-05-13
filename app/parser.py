@@ -131,8 +131,6 @@ def raw_calldata(date_start, date_end):
 
 def calldata_json(date_start, date_end):
 
-
-
     try:
         DEBUG = app.config["FLASK_DEBUG"]
 

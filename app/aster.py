@@ -5,6 +5,7 @@ import re; re._pattern_type = re.Pattern
 from time import sleep
 from random import SystemRandom
 from string import ascii_uppercase, digits
+import json
 
 asterisk_host = app.config.get("ASTERISK_HOST")
 asterisk_ami_username = app.config.get("ASTERISK_AMI_USERNAME")
@@ -132,14 +133,14 @@ def event_listener(event,**kwargs):
     elif event.name == "EndpointListComplete":
         GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]].append({ "status" : event["EventList"] })
 
-def run_call(ext, to):
+def run_call(ext, to_num):
     try:
         ami_client=get_asterisk_client()
     except ValueError as e:
         return e.msg
 
     sip = 'PJSIP/{}'.format(ext)
-    tel = '{}'.format(to)
+    tel = '{}'.format(to_num)
 
     call_action = SimpleAction(
         'Originate',
@@ -147,16 +148,25 @@ def run_call(ext, to):
         Exten=tel,
         Priority=1,
         Context='from-internal',
-        CallerID='crmdancer',
+        CallerID='<Call_to_' + to_num  + ">",
     )
 
-    call_init_request = ami_client.send_action(call_action, callback=None)
-    if call_init_request.response.is_error():
-        ami_client.logoff()
-        if call_init_request.response.keys["Message"] == "Originate failed":
-            return '{"error": "PBX_CALL_FAILED" }'
-        else:
-            return '{"error": ' + call_init_request.response.keys["Message"] + ' }'
-    else:
-        ami_client.logoff()
-        return call_init_request.response
+    operator_status=json.loads(get_sip_status(ext))
+
+    if "error" in operator_status:
+        return '{"error": "OPERATOR_OFFLINE"}'
+    elif "status" in operator_status:
+        if operator_status["status"] == "In use":
+            return '{"error": "OPERATOR_BUSY"}'
+        elif operator_status["status"] == "Not in use":
+            call_init_request = ami_client.send_action(call_action, callback=None)
+            print(call_init_request.response)
+            if call_init_request.response and call_init_request.response.is_error():
+                ami_client.logoff()
+                if call_init_request.response.keys["Message"] == "Originate failed":
+                    return '{"error": "PBX_CALL_FAILED" }'
+                else:
+                    return '{"error": ' + call_init_request.response.keys["Message"] + ' }'
+            else:
+                ami_client.logoff()
+                return '{"result": "CALL_ORIGINATED"}'

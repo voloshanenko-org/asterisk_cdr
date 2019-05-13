@@ -408,11 +408,59 @@ function updateTable(important_records, all_records){
 };
 
 function initCall(call_num){
-    showToastr("error", "Для любителей поклацать кнопки и не ждать анонса! :)")
+
+    my_number = $("#username").attr("value")
+    endpoint = "/_init_call"
+
+    $.getJSON($SCRIPT_ROOT + endpoint, {
+        dstnum: call_num
+    }).done(function(data) {
+        if ("error" in data){
+            if (data["error"] == "OPERATOR_OFFLINE"){
+                toastr_type = "error"
+                toastr_message = "Operator " + my_number + " OFFLINE</br>Can't originate the call!"
+            }else if(data["error"] == "OPERATOR_BUSY"){
+                toastr_type = "warning"
+                toastr_message = "Operator " + my_number + " BUSY</br>Finish previous call and try again!"
+            }else{
+                toastr_type = "error"
+                toastr_message = "ERROR: " + data["error"] + "</br>Can't originate the call!"
+            }
+        } else if("result" in data) {
+            toastr_type = "call_success"
+            toastr_message = "Call to " + call_num + " ORIGINATED.<br> Please answer the call"
+        }
+        showToastr(toastr_type, toastr_message)
+    }).fail(function(data){
+        if (data.status != 200){
+            error_message = "Error " + data.status + ". " + data.statusText
+            showToastr("error", error_message)
+        }else{
+            window.location.replace("/login");
+        }
+    });
+
 }
 
 function showToastr(toastr_type, toastr_message){
-    if (toastr_type=="success"){
+    if (toastr_type=="call_success"){
+        toastr.options = {
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": false,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "10000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
+    } else if (toastr_type=="success"){
         toastr.options = {
             "debug": false,
             "newestOnTop": true,
@@ -446,8 +494,27 @@ function showToastr(toastr_type, toastr_message){
             "showMethod": "fadeIn",
             "hideMethod": "fadeOut"
         }
+    }else if (toastr_type=="warning") {
+        toastr.options = {
+            "debug": false,
+            "newestOnTop": true,
+            "progressBar": true,
+            "positionClass": "toast-top-right",
+            "preventDuplicates": true,
+            "onclick": null,
+            "showDuration": "300",
+            "hideDuration": "1000",
+            "timeOut": "5000",
+            "extendedTimeOut": "1000",
+            "showEasing": "swing",
+            "hideEasing": "linear",
+            "showMethod": "fadeIn",
+            "hideMethod": "fadeOut"
+        }
     }
-
+    if (toastr_type == "call_success"){
+        toastr_type = "success"
+    }
     toastr[toastr_type](toastr_message)
 };
 
@@ -559,12 +626,13 @@ function CallActionFormatter(value, row){
     if (call_to_num!=my_number){
         call_action_html =
             '<div class="dropdown">' +
-            '  <button class="btn btn-success dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
+            '  <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +
             '  <i class="fa fa-phone" aria-hidden="true"></i>' +
             '  </button>' +
             '  <div class="dropdown-menu" aria-labelledby="dropdownMenu">' +
-            '    <button class=\"dropdown-item\" type="button" onclick="initCall(call_to_num);">Call to ' + call_to_num + '</button>' +
-            '  </div>'
+            '    <button class="dropdown-item btn-sm" type="button" onclick="initCall(call_to_num);">Call to ' + call_to_num + '</button>' +
+            '  </div>' +
+            '</div>'
         return call_action_html
     }
 }

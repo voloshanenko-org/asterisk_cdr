@@ -160,7 +160,6 @@ def run_call(ext, to_num):
             return '{"error": "OPERATOR_BUSY"}'
         elif operator_status["status"] == "Not in use":
             call_init_request = ami_client.send_action(call_action, callback=None)
-            print(call_init_request.response)
             if call_init_request.response and call_init_request.response.is_error():
                 ami_client.logoff()
                 if call_init_request.response.keys["Message"] == "Originate failed":

@@ -8,8 +8,6 @@ import re
 import timeout_decorator
 import time
 from app import app
-
-
 from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.sql.sqltypes import String, DateTime, NullType
 
@@ -43,7 +41,7 @@ class LiteralDialect(DefaultDialect):
 
 
 # Limit time for connection Error
-@timeout_decorator.timeout(5, use_signals=False, timeout_exception=ConnectionError)
+@timeout_decorator.timeout(3, use_signals=False, timeout_exception=ConnectionError)
 def check_user_credentials(username, password):
     try:
         user = User.query\

@@ -1,6 +1,8 @@
 from sqlalchemy.inspection import inspect
 from app import db, login
 from flask_login import UserMixin
+from sqlalchemy import exc
+
 
 class BaseModel(db.Model):
     __abstract__ = True
@@ -19,6 +21,7 @@ class BaseModel(db.Model):
     def __getitem__(self, key):
         return getattr(self, key)
 
+
 class User(UserMixin, BaseModel):
     __bind_key__ = "users"
     __tablename__ = "sip"
@@ -28,8 +31,12 @@ class User(UserMixin, BaseModel):
 
 
 @login.user_loader
+
 def load_user(id):
-    return User.query.get(int(id))
+    try:
+        return User.query.get(int(id))
+    except exc.OperationalError as e:
+        return None
 
 
 class CallsLog(BaseModel):

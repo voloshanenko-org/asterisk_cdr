@@ -630,7 +630,7 @@ function CallActionFormatter(value, row){
             '  <i class="fa fa-phone" aria-hidden="true"></i>' +
             '  </button>' +
             '  <div class="dropdown-menu" aria-labelledby="dropdownMenu">' +
-            '    <button class="dropdown-item btn-sm" type="button" onclick="initCall(call_to_num);">Call to ' + call_to_num + '</button>' +
+            '    <button class="dropdown-item btn-sm" type="button" onclick="initCall(' + call_to_num + ');">Call to ' + call_to_num + '</button>' +
             '  </div>' +
             '</div>'
         return call_action_html

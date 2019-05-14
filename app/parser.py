@@ -89,6 +89,7 @@ def raw_calldata(date_start, date_end):
         .filter(or_(
                     and_(CelLog.eventtype == "BRIDGE_ENTER", CelLog.context.like("macro-dial%"), not_(CelLog.appname == "AppDial")),
                     and_(CelLog.eventtype == "CHAN_START", not_(CelLog.context == "from-queue"), not_(CelLog.context == "from-pstn"), not_(CelLog.exten == "s")),
+                    and_(CelLog.eventtype == "CHAN_START", CelLog.context == "from-internal", CelLog.exten == "s"),
                     and_(CelLog.eventtype == "CHAN_START", CelLog.context == "from-pstn"),
                     and_(CelLog.eventtype == "APP_START", CelLog.appname == "MixMonitor"),
                     CelLog.eventtype == "ANSWER",
@@ -159,20 +160,24 @@ def calldata_json(date_start, date_end):
 
                 # if Start of the call
                 if event["eventtype"] == "CHAN_START":
-                    call_data.setdefault("calldate",event["eventtime"])
-                    # Set call_start data
-                    call_start = event["eventtime"]
-                    #Set incoming or outgoing call
-                    if event["context"] == "from-pstn":
-                        call_data.setdefault("direction", "Incoming")
-                    elif event["context"] == "from-internal":
-                        call_data.setdefault("direction", "Outgoing")
-                        # Set src/dst for outgoing call
-                        call_data.setdefault("src", event["cid_num"])
-                        call_data.setdefault("dst", event["exten"])
+                    if event["context"] == "from-internal" and event["exten"] == "s":
+                        if not temp_start_date:
+                            temp_start_date = event["eventtime"]
                     else:
-                        print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
-                        raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
+                        call_data.setdefault("calldate",event["eventtime"])
+                        # Set call_start data
+                        call_start = event["eventtime"]
+                        #Set incoming or outgoing call
+                        if event["context"] == "from-pstn":
+                            call_data.setdefault("direction", "Incoming")
+                        elif event["context"] == "from-internal":
+                            call_data.setdefault("direction", "Outgoing")
+                            # Set src/dst for outgoing call
+                            call_data.setdefault("src", event["cid_num"])
+                            call_data.setdefault("dst", event["exten"])
+                        else:
+                            print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
+                            raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
                 elif event["eventtype"] == "APP_START":
                     records.append(event["appdata"].split(",")[0])
                     if not temp_num:

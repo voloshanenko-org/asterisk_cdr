@@ -175,13 +175,18 @@ def calldata_json(date_start, date_end):
                         raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call context: " + event["context"])
                 elif event["eventtype"] == "APP_START":
                     records.append(event["appdata"].split(",")[0])
-                    temp_num = event["cid_num"]
-                    temp_start_date = event["eventtime"]
+                    if not temp_num:
+                        temp_num = event["cid_num"]
+                    if not temp_start_date:
+                        temp_start_date = event["eventtime"]
                     dst_temp_extension_search = re.search('.*/out-([0-9]+)-.*', event["appdata"], re.IGNORECASE)
-                    if dst_temp_extension_search:
+                    if dst_temp_extension_search and not temp_dst_num:
                         temp_dst_num = dst_temp_extension_search.group(1)
                 elif event["eventtype"] == "ANSWER":
-                    temp_num = event["cid_num"]
+                    if not temp_start_date:
+                        temp_start_date = event["eventtime"]
+                    if not temp_num:
+                        temp_num = event["cid_num"]
                 elif event["eventtype"] == "BRIDGE_ENTER":
                     talk_start = event["eventtime"]
                     call_data.setdefault("src", event["cid_num"])

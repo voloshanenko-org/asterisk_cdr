@@ -148,6 +148,10 @@ def calldata_json(date_start, date_end):
             call_end = None
             talk_start = None
 
+            temp_start_date = None
+            temp_num = None
+            temp_dst_num = None
+
             # Set event linkedID
             call_data.setdefault("linkedid",linked_id)
 
@@ -194,6 +198,10 @@ def calldata_json(date_start, date_end):
                         src_extension_search = re.search('PJSIP/(.*)-.*', call_extra_data["hangupsource"], re.IGNORECASE)
                         if src_extension_search:
                             call_data.setdefault("src", src_extension_search.group(1))
+
+                        dst_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
+                        if dst_extension_search:
+                            temp_dst_num = dst_extension_search.group(1)
                         call_data["direction"] = "Outgoing"
 
                         call_end = event["eventtime"]

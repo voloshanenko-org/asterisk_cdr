@@ -131,14 +131,13 @@ def raw_calldata(date_start, date_end):
 def calldata_json(date_start, date_end):
 
     try:
-        DEBUG = app.config["FLASK_DEBUG"]
+        grouped_cels_data = raw_calldata(date_start, date_end)
 
+        DEBUG = app.config["FLASK_DEBUG"]
         if DEBUG:
             start_time = time.time()
 
-        grouped_cels_data = raw_calldata(date_start, date_end)
         final_data = []
-
         for linked_id, linked_events in grouped_cels_data.items():
 
             call_data = {}
@@ -192,12 +191,14 @@ def calldata_json(date_start, date_end):
                         temp_num = event["cid_num"]
                 elif event["eventtype"] == "BRIDGE_ENTER":
                     talk_start = event["eventtime"]
-                    call_data.setdefault("src", event["cid_num"])
-                    # if incoming call answered - set by whom below
-                    if event["context"] == "macro-dial-one":
-                        dst_extension_search = re.search('PJSIP/(.*)/sip:.*', event["appdata"], re.IGNORECASE)
-                        if dst_extension_search:
-                            call_data.setdefault("dst", dst_extension_search.group(1))
+                    src_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
+                    if not src_extension_search:
+                        call_data.setdefault("src", event["cid_num"])
+                        # if incoming call answered - set by whom below
+                        if event["context"] == "macro-dial-one":
+                            dst_extension_search = re.search('PJSIP/(.*)/sip:.*', event["appdata"], re.IGNORECASE)
+                            if dst_extension_search:
+                                call_data.setdefault("dst", dst_extension_search.group(1))
                 # If end of the call
                 elif event["eventtype"] == "HANGUP":
                     # Set call_end data
@@ -205,7 +206,11 @@ def calldata_json(date_start, date_end):
                         call_extra_data = json.loads(event["extra"])
                         src_extension_search = re.search('PJSIP/(.*)-.*', call_extra_data["hangupsource"], re.IGNORECASE)
                         if src_extension_search:
-                            call_data.setdefault("src", src_extension_search.group(1))
+                            additonal_src_extension_search = re.search('PJSIP/(.*)-.*', event["channame"], re.IGNORECASE)
+                            if additonal_src_extension_search and additonal_src_extension_search != src_extension_search.group(1):
+                                call_data.setdefault("src", additonal_src_extension_search.group(1))
+                            else:
+                                call_data.setdefault("src", src_extension_search.group(1))
 
                         dst_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
                         if dst_extension_search:
@@ -275,6 +280,10 @@ def calldata_json(date_start, date_end):
 
                 final_data.append(call_data)
 
+        if DEBUG:
+            print("--- Initial data parsing execution time %s seconds ---" % (time.time() - start_time))
+            start_time = time.time()
+
         # Replace +38 prefix if exist in src num for incoming calls
         for idx, call in enumerate(final_data):
             if call['direction'] == "Incoming":
@@ -314,7 +323,7 @@ def calldata_json(date_start, date_end):
                     final_data[idx]["missed"] = missed_calls_array
 
         if DEBUG:
-            print("--- Data parsing execution time %s seconds ---" % (time.time() - start_time))
+            print("--- Final data parsing execution time %s seconds ---" % (time.time() - start_time))
 
     except exc.OperationalError as e:
         raise

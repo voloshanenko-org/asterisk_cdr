@@ -8,7 +8,7 @@ ALTER TABLE cel ADD KEY eventtime (eventtime);
 
 Also we need to add event to delete 'anonymous records' from cel table
 
-CREATE DEFINER=`root`@`localhost` EVENT `delete_anonymous_records_from_cel_table` ON SCHEDULE EVERY 1 MINUTE STARTS NOW() ON COMPLETION NOT PRESERVE DISABLE ON SLAVE DO DELETE from asteriskcdrdb.cel WHERE channame like 'PJSIP/anonymous%';
+CREATE EVENT delete_anonymous_records_from_cel_table ON SCHEDULE EVERY 1 MINUTE DO DELETE from asteriskcdrdb.cel WHERE channame like 'PJSIP/anonymous%';
 
 Local env:
 pip3 install virtualenv

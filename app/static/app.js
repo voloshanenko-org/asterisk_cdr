@@ -219,7 +219,13 @@ function GenerateTableData(data){
                 return !(item["disposition"] == "ANSWERED");
             });
         }
-        updateTable(important_records, all_records)
+
+        var my_number = $("#username").attr("value")
+        var my_records = data["result"].filter(function(item) {
+            return (item["dst"] == my_number && item["direction"] == "Incoming") || (item["src"] == my_number && item["direction"] == "Outgoing");
+        });
+
+        updateTable(important_records, all_records, my_records)
     }else if ("error" in data){
         error_message = "Operational error. " + data["error"]
         setTimeout(hideSpinnerLoading, 500)
@@ -227,7 +233,62 @@ function GenerateTableData(data){
     }
 }
 
-function updateTable(important_records, all_records){
+function updateTable(important_records, all_records, my_records){
+
+    var columns_important = [
+        {
+            "field": "calldate",
+            "title": "Date",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "direction",
+            "title": "Direction",
+            "formatter": "CallDirectionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "src",
+            "title": "From",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "dst",
+            "title": "To",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "disposition",
+            "title": "Status",
+            "formatter": "CallDispositionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "waiting_duration",
+            "title": "Wait, sec",
+            "halign": "center",
+            "align": "center",
+            "sortable": true
+        },
+        {
+            "field": "call_action",
+            "title": "Call",
+            "formatter": "CallActionFormatter",
+            "halign": "center",
+            "align": "center",
+            "sortable": false
+        }
+    ]
 
     var columns_all = [
         {
@@ -298,85 +359,6 @@ function updateTable(important_records, all_records){
             "sortable": false
         }
     ]
-    var columns_important = [
-        {
-            "field": "calldate",
-            "title": "Date",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        },
-        {
-            "field": "direction",
-            "title": "Direction",
-            "formatter": "CallDirectionFormatter",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        },
-        {
-            "field": "src",
-            "title": "From",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        },
-        {
-            "field": "dst",
-            "title": "To",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        },
-        {
-            "field": "disposition",
-            "title": "Status",
-            "formatter": "CallDispositionFormatter",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        },
-        {
-            "field": "waiting_duration",
-            "title": "Wait, sec",
-            "halign": "center",
-            "align": "center",
-            "sortable": true
-        },
-        {
-            "field": "call_action",
-            "title": "Call",
-            "formatter": "CallActionFormatter",
-            "halign": "center",
-            "align": "center",
-            "sortable": false
-        }
-    ]
-
-    $('#all-records-table').bootstrapTable({
-        columns: columns_all,
-        rowStyle: rowStyle,
-        pageSize: 25,
-        rowAttributes: rowAttributes,
-        exportDataType: "all",
-        exportTypes: ['excel', 'pdf'],
-        exportOptions:{
-            fileName: 'call_report',
-            worksheetName: 'Call Report',
-            tableName: 'call_report',
-            mso: {
-                fileFormat: 'xlshtml',
-                onMsoNumberFormat: doOnMsoNumberFormat
-            }
-        }
-     });
-
-    $('#all-records-table').on('post-body.bs.table', function (e) {
-        $('[data-toggle="popover"]').popover()
-    })
-
-    $('#all-records-table').bootstrapTable('load', all_records);
-
 
     $('#important-records-table').bootstrapTable({
         columns: columns_important,
@@ -401,6 +383,55 @@ function updateTable(important_records, all_records){
     })
 
     $('#important-records-table').bootstrapTable('load', important_records);
+
+    $('#all-records-table').bootstrapTable({
+        columns: columns_all,
+        rowStyle: rowStyle,
+        pageSize: 25,
+        rowAttributes: rowAttributes,
+        exportDataType: "all",
+        exportTypes: ['excel', 'pdf'],
+        exportOptions:{
+            fileName: 'call_report',
+            worksheetName: 'Call Report',
+            tableName: 'call_report',
+            mso: {
+                fileFormat: 'xlshtml',
+                onMsoNumberFormat: doOnMsoNumberFormat
+            }
+        }
+    });
+
+    $('#all-records-table').on('post-body.bs.table', function (e) {
+        $('[data-toggle="popover"]').popover()
+    })
+
+    $('#all-records-table').bootstrapTable('load', all_records);
+
+
+    $('#my-records-table').bootstrapTable({
+        columns: columns_all,
+        rowStyle: rowStyle,
+        pageSize: 25,
+        rowAttributes: rowAttributes,
+        exportDataType: "all",
+        exportTypes: ['excel', 'pdf'],
+        exportOptions:{
+            fileName: 'call_report',
+            worksheetName: 'Call Report',
+            tableName: 'call_report',
+            mso: {
+                fileFormat: 'xlshtml',
+                onMsoNumberFormat: doOnMsoNumberFormat
+            }
+        }
+    });
+
+    $('#my-records-table').on('post-body.bs.table', function (e) {
+        $('[data-toggle="popover"]').popover()
+    })
+
+    $('#my-records-table').bootstrapTable('load', my_records);
 
     //Hide loading spinner
     setTimeout(hideSpinnerLoading, 500)

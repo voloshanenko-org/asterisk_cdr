@@ -119,6 +119,9 @@
                 <li class="nav-item">
                     <a class="nav-link" id="all-records-tab" data-toggle="tab" href="#all-records" role="tab" aria-controls="all-records" aria-selected="false">All records</a>
                 </li>
+                <li class="nav-item">
+                    <a class="nav-link" id="my-records-tab" data-toggle="tab" href="#my-records" role="tab" aria-controls="all-records" aria-selected="false">My records</a>
+                </li>
             </ul>
         </div>
     </div>
@@ -156,6 +159,19 @@
                         data-pagination="true"
                         data-show-fullscreen="true"
                         data-show-export="true">
+                    </table>
+                </div>
+                <div class="tab-pane fade" id="my-records" role="tabpanel" aria-labelledby="my-records-tab">
+                    <div id="my-records-toolbar"></div>
+                    <table
+                            id="my-records-table"
+                            data-toggle="true"
+                            data-toolbar="#my-records-toolbar"
+                            data-search="true"
+                            data-show-columns="true"
+                            data-pagination="true"
+                            data-show-fullscreen="true"
+                            data-show-export="true">
                     </table>
                 </div>
             </div>

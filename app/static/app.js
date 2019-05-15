@@ -615,15 +615,15 @@ function CallDispositionFormatter(value, row) {
 
 function CallActionFormatter(value, row){
 
+    my_number = $("#username").attr("value")
+
     if (row.direction == "Incoming"){
         call_to_num = row.src
     }else if (row.direction == "Outgoing"){
         call_to_num = row.dst
     }
 
-    my_number = $("#username").attr("value")
-
-    if (call_to_num!=my_number){
+    if (call_to_num != null && call_to_num!=my_number){
         call_action_html =
             '<div class="dropdown">' +
             '  <button class="btn btn-success btn-sm dropdown-toggle" type="button" id="dropdownMenu" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">' +

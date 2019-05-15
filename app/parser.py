@@ -192,6 +192,9 @@ def calldata_json(date_start, date_end):
                         temp_start_date = event["eventtime"]
                     if not temp_num:
                         temp_num = event["cid_num"]
+                    dst_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
+                    if dst_extension_search and not temp_dst_num:
+                        temp_dst_num = dst_extension_search.group(1)
                 elif event["eventtype"] == "BRIDGE_ENTER":
                     talk_start = event["eventtime"]
                     src_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
@@ -216,7 +219,7 @@ def calldata_json(date_start, date_end):
                                 call_data.setdefault("src", src_extension_search.group(1))
 
                         dst_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
-                        if dst_extension_search:
+                        if dst_extension_search and not temp_dst_num:
                             temp_dst_num = dst_extension_search.group(1)
                         call_data["direction"] = "Outgoing"
 

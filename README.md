@@ -5,6 +5,7 @@ We use cel table from asteriskcdr db, which haven;t index on eventtime field!
 To speedup queries we need to add INDEX on this field
 
 ALTER TABLE cel ADD KEY eventtime (eventtime)
+ALTER TABLE cel ADD KEY channame (channame)
 
 Local env:
 pip3 install virtualenv

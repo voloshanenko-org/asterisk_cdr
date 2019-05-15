@@ -78,6 +78,15 @@ def raw_calldata(date_start, date_end):
         for l in linkedid_data:
             linkedid_data_filtered.append(l.linkedid.replace("'", ""))
 
+        if DEBUG == "1":
+            statement = linkedid_query.statement
+            raw_text_sql=statement.compile(
+                dialect=LiteralDialect(),
+                compile_kwargs={'literal_binds': True},
+            ).string
+            #print("LinkedID SQL: " + raw_text_sql)
+            print("--- SQL (Get Uniq LinkedID for calls) execution time %s seconds ---" % (time.time() - start_time))
+            start_time = time.time()
 
         # Retrieve all call data based on linkedid_data.
         # We don't want to miss call data for call which start at date range but finished later or finished at date range but started before.
@@ -98,13 +107,6 @@ def raw_calldata(date_start, date_end):
         cels = cels_query.all()
 
         if DEBUG == "1":
-            statement = linkedid_query.statement
-            raw_text_sql=statement.compile(
-                dialect=LiteralDialect(),
-                compile_kwargs={'literal_binds': True},
-            ).string
-            #print("LinkedID SQL: " + raw_text_sql)
-
             statement = cels_query.statement
             raw_text_sql=statement.compile(
                 dialect=LiteralDialect(),
@@ -112,7 +114,7 @@ def raw_calldata(date_start, date_end):
             ).string
             #print("Calls data SQL: " + raw_text_sql)
 
-            print("--- SQL execution time %s seconds ---" % (time.time() - start_time))
+            print("--- SQL (Get calls data based on LinkedID) execution time %s seconds ---" % (time.time() - start_time))
 
     except exc.OperationalError as e:
         raise

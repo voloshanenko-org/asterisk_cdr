@@ -1,4 +1,4 @@
-from app.models import CallsLog, CelLog, User
+from app.models import CelLog, User
 from sqlalchemy import and_, not_, or_
 from itertools import groupby
 from operator import itemgetter
@@ -66,8 +66,9 @@ def raw_calldata(date_start, date_end):
 
         # Get uniq linkedid for calls
         linkedid_query = CelLog.query \
+            .with_hint(CelLog,"FORCE INDEX (eventtime)") \
             .with_entities(CelLog.linkedid) \
-            .filter(and_(CelLog.eventtime > date_start, CelLog.eventtime < date_end)) \
+            .filter(CelLog.eventtime.between(date_start, date_end)) \
             .filter(not_(CelLog.channame.like("%PJSIP/anonymous%"))) \
             .distinct(CelLog.linkedid) \
             .order_by(CelLog.linkedid, CelLog.id)
@@ -84,7 +85,7 @@ def raw_calldata(date_start, date_end):
                 dialect=LiteralDialect(),
                 compile_kwargs={'literal_binds': True},
             ).string
-            #print("LinkedID SQL: " + raw_text_sql)
+            #print("LinkedID SQL: " + raw_text_sql.replace("\n", ""))
             print("--- SQL (Get Uniq LinkedID for calls) execution time %s seconds ---" % (time.time() - start_time))
             start_time = time.time()
 
@@ -112,7 +113,7 @@ def raw_calldata(date_start, date_end):
                 dialect=LiteralDialect(),
                 compile_kwargs={'literal_binds': True},
             ).string
-            #print("Calls data SQL: " + raw_text_sql)
+            #print("Calls data SQL: " + raw_text_sql.replace("\n", ""))
 
             print("--- SQL (Get calls data based on LinkedID) execution time %s seconds ---" % (time.time() - start_time))
 

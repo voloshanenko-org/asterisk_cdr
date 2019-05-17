@@ -137,7 +137,7 @@ def run_call(ext, to_num):
     try:
         ami_client=get_asterisk_client()
     except ValueError as e:
-        return e.msg
+        return e.args[0]
 
     sip = 'PJSIP/{}'.format(ext)
     tel = '{}'.format(to_num)

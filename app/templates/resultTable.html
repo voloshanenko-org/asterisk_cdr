@@ -6,10 +6,10 @@
     <h1></h1>
     <br/>
     <div class="row">
-        <div class="col-md-2">
+        <div class="col-md-1">
             <h5>Quick Filters</h5>
         </div>
-        <div class="col-md-6" align="left">
+        <div class="col-md-5" align="left">
             <a href="#" class="badge badge-light" onclick="setLastHour();">Last Hour</a>
             <a href="#" class="badge badge-success" onclick="setToday();">Today</a>
             <a href="#" class="badge badge-secondary" onclick="setYesterday();">Yesterday</a>
@@ -18,6 +18,17 @@
         </div>
 
         {% if not current_user.is_anonymous %}
+
+            <div class="col-md-2" align="center">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" id="customNumberCallTo" placeholder="Phone number" aria-label="Username" aria-describedby="basic-addon1">
+                    <button class="btn btn-success btn-sm" type="button" onclick="initCall($('#customNumberCallTo').val());" aria-haspopup="true" aria-expanded="false">
+                        <i class="fa fa-phone" aria-hidden="true"></i>
+                    </button>
+                </div>
+
+            </div>
+
             <div class="col-md-1" align="center">
                 <div id="sip_status_label" data-toggle="tooltip" title="Offline">Offline</div>
                 <div id="sip_status_dot" class='dot dot-lg dot-danger' data-toggle="tooltip" title="Offline"></div>

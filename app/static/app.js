@@ -57,11 +57,11 @@ function setControls(){
 
     $("#time_start_picker").datetimepicker({
         format: 'HH:mm',
-        stepping: 30
+        stepping: 15
     });
     $("#time_end_picker").datetimepicker({
         format: 'HH:mm',
-        stepping: 30,
+        stepping: 15,
     });
 
     $('#oneday_radio').on("click", function() {
@@ -82,12 +82,18 @@ function setControls(){
     });
 
     $("#time_start_picker").on("change.datetimepicker", function (e) {
-        $('#time_end_picker').datetimepicker('minDate', moment(e.date).add(30, 'm').toDate());
+        $('#time_end_picker').datetimepicker('minDate', moment(e.date).add(15, 'm').toDate());
     });
     $("#time_end_picker").on("change.datetimepicker", function (e) {
-        $('#time_start_picker').datetimepicker('maxDate', moment(e.date).add(-30, 'm').toDate());
+        $('#time_start_picker').datetimepicker('maxDate', moment(e.date).add(-15, 'm').toDate());
     });
 
+    $("#customNumberCallTo").on("keyup", function (e){
+        if (e.keyCode === 13) {
+            e.preventDefault();
+            initCall($("#customNumberCallTo").val());
+        }
+    });
 };
 
 function setLastHour(){
@@ -363,7 +369,8 @@ function updateTable(important_records, all_records, my_records){
     $('#important-records-table').bootstrapTable({
         columns: columns_important,
         rowStyle: rowStyle,
-        pageSize: 25,
+        pageSize: 100,
+        pageList: [100, 200, 500],
         rowAttributes: rowAttributes,
         exportDataType: "all",
         exportTypes: ['excel', 'pdf'],
@@ -387,7 +394,8 @@ function updateTable(important_records, all_records, my_records){
     $('#all-records-table').bootstrapTable({
         columns: columns_all,
         rowStyle: rowStyle,
-        pageSize: 25,
+        pageSize: 100,
+        pageList: [100, 200, 500],
         rowAttributes: rowAttributes,
         exportDataType: "all",
         exportTypes: ['excel', 'pdf'],
@@ -412,7 +420,8 @@ function updateTable(important_records, all_records, my_records){
     $('#my-records-table').bootstrapTable({
         columns: columns_all,
         rowStyle: rowStyle,
-        pageSize: 25,
+        pageSize: 100,
+        pageList: [100, 200, 500],
         rowAttributes: rowAttributes,
         exportDataType: "all",
         exportTypes: ['excel', 'pdf'],
@@ -438,39 +447,64 @@ function updateTable(important_records, all_records, my_records){
     setTimeout(showToastr("success", "Report updated"), 600)
 };
 
+function validateCallNumber(call_num) {
+    if (call_num == null || call_num == ""){
+        error = "Phone number can't be empty!"
+        return '{ "error": "' + error +'"}'
+    }
+    if (call_num.match(/^[0-9]+$/) == null){
+        error = "Phone number can include ONLY digits!"
+        return '{ "error": "' + error +'"}'
+    }
+
+    allowed_num_lentgh = ["3", "4", "6", "7", "10"]
+
+    if (!allowed_num_lentgh.includes(call_num.length).toString()){
+        error = "Phone number should include ONLY " + allowed_num_lentgh + " DIGITS"
+        return '{ "error": "' + error +'"}'
+    }
+
+    return '{ "result": "validated"}'
+}
+
 function initCall(call_num){
 
     my_number = $("#username").attr("value")
     endpoint = "/_init_call"
+    number_validated = JSON.parse(validateCallNumber(call_num))
 
-    $.getJSON($SCRIPT_ROOT + endpoint, {
-        dstnum: call_num
-    }).done(function(data) {
-        if ("error" in data){
-            if (data["error"] == "OPERATOR_OFFLINE"){
-                toastr_type = "error"
-                toastr_message = "Operator " + my_number + " OFFLINE</br>Can't originate the call!"
-            }else if(data["error"] == "OPERATOR_BUSY"){
-                toastr_type = "warning"
-                toastr_message = "Operator " + my_number + " BUSY</br>Finish previous call and try again!"
-            }else{
-                toastr_type = "error"
-                toastr_message = "ERROR: " + data["error"] + "</br>Can't originate the call!"
+    if ("result" in number_validated) {
+        $.getJSON($SCRIPT_ROOT + endpoint, {
+            dstnum: call_num
+        }).done(function(data) {
+            if ("error" in data){
+                if (data["error"] == "OPERATOR_OFFLINE"){
+                    toastr_type = "error"
+                    toastr_message = "Operator " + my_number + " OFFLINE</br>Can't originate the call!"
+                }else if(data["error"] == "OPERATOR_BUSY"){
+                    toastr_type = "warning"
+                    toastr_message = "Operator " + my_number + " BUSY</br>Finish previous call and try again!"
+                }else{
+                    toastr_type = "error"
+                    toastr_message = "ERROR: " + data["error"] + "</br>Can't originate the call!"
+                }
+            } else if("result" in data) {
+                toastr_type = "call_success"
+                toastr_message = "Call to " + call_num + " ORIGINATED.<br> Please answer the call"
             }
-        } else if("result" in data) {
-            toastr_type = "call_success"
-            toastr_message = "Call to " + call_num + " ORIGINATED.<br> Please answer the call"
-        }
-        showToastr(toastr_type, toastr_message)
-    }).fail(function(data){
-        if (data.status != 200){
-            error_message = "Error " + data.status + ". " + data.statusText
-            showToastr("error", error_message)
-        }else{
-            window.location.replace("/login");
-        }
-    });
-
+            showToastr(toastr_type, toastr_message)
+        }).fail(function(data){
+            if (data.status != 200){
+                error_message = "Error " + data.status + ". " + data.statusText
+                showToastr("error", error_message)
+            }else{
+                window.location.replace("/login");
+            }
+        });
+    } else if ("error" in number_validated){
+        error_message = number_validated["error"]
+        showToastr("warning", error_message)
+    }
 }
 
 function showToastr(toastr_type, toastr_message){

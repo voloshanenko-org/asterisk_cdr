@@ -199,12 +199,18 @@ def calldata_json(date_start, date_end):
                     talk_start = event["eventtime"]
                     src_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
                     if not src_extension_search:
-                        call_data.setdefault("src", event["cid_num"])
+                        if not event["context"] == "macro-dialout-trunk":
+                            call_data.setdefault("src", event["cid_num"])
                         # if incoming call answered - set by whom below
                         if event["context"] == "macro-dial-one":
                             dst_extension_search = re.search('PJSIP/(.*)/sip:.*', event["appdata"], re.IGNORECASE)
                             if dst_extension_search:
                                 call_data.setdefault("dst", dst_extension_search.group(1))
+                        elif event["context"] == "macro-dialout-trunk":
+                            dst_extension_search = re.search('PJSIP/(.*)@.*', event["appdata"], re.IGNORECASE)
+                            if dst_extension_search:
+                                call_data.setdefault("dst", dst_extension_search.group(1))
+
                 # If end of the call
                 elif event["eventtype"] == "HANGUP":
                     # Set call_end data
@@ -283,6 +289,9 @@ def calldata_json(date_start, date_end):
                     # Call still active. Set status to "Incall"
                     call_data.setdefault("disposition", "Incall")
                     call_data.setdefault("src", temp_num)
+
+                if DEBUG:
+                    print(linked_id)
 
                 final_data.append(call_data)
 

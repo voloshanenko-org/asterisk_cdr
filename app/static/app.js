@@ -61,7 +61,7 @@ function setControls(){
     });
     $("#time_end_picker").datetimepicker({
         format: 'HH:mm',
-        stepping: 15,
+        stepping: 1,
     });
 
     $('#oneday_radio').on("click", function() {
@@ -120,8 +120,8 @@ function setToday(){
 
     var timeStart = moment().toDate();
     var timeEnd = moment().toDate();
-    timeStart.setHours(7, 0,0,0)
-    timeEnd.setHours(20, 0,0,0)
+    timeStart.setHours(0, 0,0,0)
+    timeEnd.setHours(23, 59,59,0)
     $("#time_start_picker").datetimepicker('date', timeStart);
     $("#time_end_picker").datetimepicker('date', timeEnd);
 
@@ -137,8 +137,8 @@ function setYesterday(){
 
     var timeStart = moment().subtract(1, 'days').toDate();
     var timeEnd = moment().subtract(1, 'days').toDate();
-    timeStart.setHours(7, 0,0,0)
-    timeEnd.setHours(20, 0,0,0)
+    timeStart.setHours(0, 0,0,0)
+    timeEnd.setHours(23, 59,59,0)
     $("#time_start_picker").datetimepicker('date', timeStart);
     $("#time_end_picker").datetimepicker('date', timeEnd);
 

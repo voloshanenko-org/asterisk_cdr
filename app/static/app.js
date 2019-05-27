@@ -167,6 +167,9 @@ function setLastWeek(){
 }
 
 function LoadCallsData() {
+    // Update data each 5 minutes
+    setTimeout(LoadCallsData, 5*60*1000);
+
     oneday_checked = $('#oneday_radio')[0].checked
     range_checked = $('#range_radio')[0].checked
 

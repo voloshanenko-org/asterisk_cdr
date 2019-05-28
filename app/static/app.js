@@ -205,8 +205,8 @@ function LoadCallsData() {
     }).fail(function(data){
         if (data.status != 200){
             error_message = "Error " + data.status + ". " + data.statusText
-            setTimeout(hideSpinnerLoading, 500)
-            setTimeout(showToastr("error", error_message), 600)
+            setTimeout(hideSpinnerLoading, 600)
+            setTimeout(showToastr("error", error_message), 700)
         }else{
             window.location.replace("/login");
         }
@@ -237,8 +237,8 @@ function GenerateTableData(data){
         updateTable(important_records, all_records, my_records)
     }else if ("error" in data){
         error_message = "Operational error. " + data["error"]
-        setTimeout(hideSpinnerLoading, 500)
-        setTimeout(showToastr("error", error_message), 600)
+        setTimeout(hideSpinnerLoading, 600)
+        setTimeout(showToastr("error", error_message), 700)
     }
 }
 
@@ -446,8 +446,8 @@ function updateTable(important_records, all_records, my_records){
     $('#my-records-table').bootstrapTable('load', my_records);
 
     //Hide loading spinner
-    setTimeout(hideSpinnerLoading, 500)
-    setTimeout(showToastr("success", "Report updated"), 600)
+    setTimeout(hideSpinnerLoading, 600)
+    setTimeout(showToastr("success", "Report updated"), 700)
 };
 
 function validateCallNumber(call_num) {

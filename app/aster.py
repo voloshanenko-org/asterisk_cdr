@@ -31,7 +31,11 @@ def get_asterisk_client():
         login_request = asterisk_client.login(username=asterisk_ami_username, secret=asterisk_ami_password)
     except Exception as e:
         asterisk_client.logoff()
-        raise ValueError('{"error": "PBX_NOT_AVAILABLE"  }')
+        # LEt try second attempt
+        try:
+            login_request = asterisk_client.login(username=asterisk_ami_username, secret=asterisk_ami_password)
+        except Exception as e:
+            raise ValueError('{"error": "PBX_NOT_AVAILABLE"  }')
 
     if not login_request.response or login_request.response.is_error():
         asterisk_client.logoff()

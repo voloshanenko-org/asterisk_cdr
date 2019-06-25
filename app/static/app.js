@@ -11,13 +11,21 @@ $(window).on('load', function(){
 function checkAllOperatorsSipStatus() {
     $.getJSON($SCRIPT_ROOT + '/_all_sip_status', {
     }).done(function(data) {
-        // Schedule next sip_status check in 1 minute
-        setTimeout(checkAllOperatorsSipStatus, 60*1000);
+        // Schedule next sip_status check in 20 seconds
+        setTimeout(checkAllOperatorsSipStatus, 20*1000);
 
-        var online_sip_agents = data.filter(function(item) {
+        var external_sip_lines_status = data.filter(function(item) {
+            return /8[0-9][0-9]/.test(item["id"]) || /Telegroup/.test(item["id"]);
+        }).sort(function(a, b) {
+            return a.id - b.id;
+        });
+        var internal_sip_agents_status = data.filter(function(item) {
             return item["device_state"] != "Unavailable" && /9[0-9][0-9]/.test(item["id"]);
-        }).sort();
-        updateSipstatusTable(online_sip_agents)
+        }).sort(function(a, b) {
+            return a.id - b.id;
+        });
+
+        updateSipstatusTable(external_sip_lines_status, internal_sip_agents_status)
     }).fail(function(data){
         if (data.status != 500){
             window.location.replace("/login");
@@ -260,7 +268,7 @@ function GenerateTableData(data){
     }
 }
 
-function updateSipstatusTable(sip_status_data){
+function updateSipstatusTable(external_sip_lines_status, internal_sip_agents_status){
 
     var columns_sip_status = [
         {
@@ -278,17 +286,17 @@ function updateSipstatusTable(sip_status_data){
         }
     ]
 
-    $('#sip-status-records-table').bootstrapTable({
+    $('#sip-status-external-records-table').bootstrapTable({
         columns: columns_sip_status,
         rowStyle: SipStatusrowStyle
     });
+    $('#sip-status-external-records-table').bootstrapTable('load', external_sip_lines_status);
 
-    $('#sip-status-records-table').on('all.bs.table', function (e) {
-        $('[data-toggle="popover"]').popover()
-    })
-
-    $('#sip-status-records-table').bootstrapTable('load', sip_status_data);
-
+    $('#sip-status-internal-records-table').bootstrapTable({
+        columns: columns_sip_status,
+        rowStyle: SipStatusrowStyle
+    });
+    $('#sip-status-internal-records-table').bootstrapTable('load', internal_sip_agents_status);
 };
 
 function DeviceStateFormatter(value, row){
@@ -299,9 +307,12 @@ function DeviceStateFormatter(value, row){
     } else if (row.device_state == "Not in use"){
         status_title = "Online"
         status_dot_class = "dot dot-lg dot-success"
+    } else if (row.device_state == "Unavailable"){
+        status_title = "Offline"
+        status_dot_class = "dot dot-lg dot-danger"
     }
-    return '<div id="sip_status_label" data-toggle="tooltip" title="' + status_title + '">' + status_title + '</div>\n' +
-           '<div id="sip_status_dot" class=\'' + status_dot_class +  '\' data-toggle="tooltip" title="Offline"></div>'
+        return '<div id="sip_status_label">' + status_title + '</div>\n' +
+           '<div id="sip_status_dot" class=\'' + status_dot_class +  '\'</div>'
 }
 
 function updateTable(important_records, all_records, my_records){
@@ -667,9 +678,11 @@ function doOnMsoNumberFormat(cell, row, col){
 }
 
 function SipStatusrowStyle(row, index) {
-    if (row.device_state == "In-use"){
+    if (row.device_state == "In use"){
+        css_class = "alert-warning"
+    } else if (row.device_state == "Not in use") {
         css_class = "alert-success"
-    } else if (row.device_state == "Not in-use") {
+    } else if (row.device_state == "Unavailable"){
         css_class = "alert-danger"
     }
 

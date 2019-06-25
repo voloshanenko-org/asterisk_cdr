@@ -4,13 +4,31 @@ $(window).on('load', function(){
         setToday();
         // Execute first SIP status check, which also will act as auth check
         checkSipStatus()
+        checkAllOperatorsSipStatus()
     }
 });
+
+function checkAllOperatorsSipStatus() {
+    $.getJSON($SCRIPT_ROOT + '/_all_sip_status', {
+    }).done(function(data) {
+        // Schedule next sip_status check in 1 minute
+        setTimeout(checkAllOperatorsSipStatus, 60*1000);
+
+        var online_sip_agents = data.filter(function(item) {
+            return item["device_state"] != "Unavailable" && /9[0-9][0-9]/.test(item["id"]);
+        }).sort();
+        updateSipstatusTable(online_sip_agents)
+    }).fail(function(data){
+        if (data.status != 500){
+            window.location.replace("/login");
+        }
+    });
+}
 
 function checkSipStatus() {
     $.getJSON($SCRIPT_ROOT + '/_sip_status', {
     }).done(function(data) {
-        // Schedule next sip_status check in 1 minute
+        // Schedule next sip_status check in 15 seconds
         setTimeout(checkSipStatus, 15*1000);
 
         if ("error" in data){
@@ -168,7 +186,7 @@ function setLastWeek(){
 
 function LoadCallsData() {
     // Update data each 5 minutes
-    setTimeout(LoadCallsData, 5*60*1000);
+    //setTimeout(LoadCallsData, 5*1000);
 
     oneday_checked = $('#oneday_radio')[0].checked
     range_checked = $('#range_radio')[0].checked
@@ -240,6 +258,50 @@ function GenerateTableData(data){
         setTimeout(hideSpinnerLoading, 600)
         setTimeout(showToastr("error", error_message), 700)
     }
+}
+
+function updateSipstatusTable(sip_status_data){
+
+    var columns_sip_status = [
+        {
+            "field": "id",
+            "title": "#",
+            "halign": "center",
+            "align": "center"
+        },
+        {
+            "field": "device_state",
+            "title": "Status",
+            "formatter": "DeviceStateFormatter",
+            "halign": "center",
+            "align": "center"
+        }
+    ]
+
+    $('#sip-status-records-table').bootstrapTable({
+        columns: columns_sip_status,
+        rowStyle: SipStatusrowStyle
+    });
+
+    $('#sip-status-records-table').on('all.bs.table', function (e) {
+        $('[data-toggle="popover"]').popover()
+    })
+
+    $('#sip-status-records-table').bootstrapTable('load', sip_status_data);
+
+};
+
+function DeviceStateFormatter(value, row){
+    var status_dot_class
+    if (row.device_state == "In use"){
+        status_title = "In-Use"
+        status_dot_class = "dot dot-lg dot-warning"
+    } else if (row.device_state == "Not in use"){
+        status_title = "Online"
+        status_dot_class = "dot dot-lg dot-success"
+    }
+    return '<div id="sip_status_label" data-toggle="tooltip" title="' + status_title + '">' + status_title + '</div>\n' +
+           '<div id="sip_status_dot" class=\'' + status_dot_class +  '\' data-toggle="tooltip" title="Offline"></div>'
 }
 
 function updateTable(important_records, all_records, my_records){
@@ -602,6 +664,19 @@ function doOnMsoNumberFormat(cell, row, col){
         result = "\\@";
     }
     return result;
+}
+
+function SipStatusrowStyle(row, index) {
+    if (row.device_state == "In-use"){
+        css_class = "alert-success"
+    } else if (row.device_state == "Not in-use") {
+        css_class = "alert-danger"
+    }
+
+    return {
+        classes: css_class,
+        css: {"font-size": "11px", "padding": ".2rem", "overflow-x": "visible !important", "overflow-y": "visible !important"}
+    };
 }
 
 function rowStyle(row, index) {

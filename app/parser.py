@@ -233,7 +233,7 @@ def calldata_json(date_start, date_end):
                         call_extra_data = json.loads(event["extra"])
                         call_status = call_extra_data["dialstatus"]
                     else:
-                        if event["context"] == "ext-queues":
+                        if event["context"] == "ext-queues" or event["context"] == "from-pstn":
                             # Set src/dst for incoming missed call
                             call_data.setdefault("src", event["cid_num"])
                         elif event["context"] == "ext-local":

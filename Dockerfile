@@ -8,6 +8,7 @@ RUN apk add --update --no-cache mariadb-connector-c-dev \
 		mariadb-dev \
 		gcc \
 		musl-dev \
+		libstdc++ \
 	&& pip install mysqlclient \
 	&& apk del .build-deps
 

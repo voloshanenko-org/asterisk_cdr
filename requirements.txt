@@ -4,4 +4,5 @@ flask-login
 flask-sqlalchemy
 mysqlclient
 timeout-decorator
+bcrypt
 

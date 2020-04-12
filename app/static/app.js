@@ -274,6 +274,7 @@ function updateSipstatusTable(external_sip_lines_status, internal_sip_agents_sta
         {
             "field": "id",
             "title": "#",
+            "formatter": "DeviceNumberFormatter",
             "halign": "center",
             "align": "center"
         },
@@ -298,6 +299,27 @@ function updateSipstatusTable(external_sip_lines_status, internal_sip_agents_sta
     });
     $('#sip-status-internal-records-table').bootstrapTable('load', internal_sip_agents_status);
 };
+
+function DeviceNumberFormatter(value, row){
+    var status_dot_class
+    if (/^9[0-9][0-9]$/.test(row.id)){
+        device_id = row.id
+        device_type = "sip"
+    } else if (/^999[0-9][0-9]$/.test(row.id)) {
+        device_id = row.id.substr(2)
+        device_type = "webrtc"
+    } else {
+        device_id = row.id
+        device_type = "other"
+    }
+
+    if (device_type == "webrtc") {
+        type_icon = " <i class=\"fa fa-globe\" aria-hidden=\"true\" style=\"font-size:18px\"></i>"
+    } else {
+        type_icon = ""
+    }
+    return '<div id="sip_id_label">' + device_id + ' ' + type_icon +'</div>\n'
+}
 
 function DeviceStateFormatter(value, row){
     var status_dot_class
@@ -336,6 +358,7 @@ function updateTable(important_records, all_records, my_records){
         {
             "field": "src",
             "title": "From",
+            "formatter": "CallFromFormatter",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -391,6 +414,7 @@ function updateTable(important_records, all_records, my_records){
         {
             "field": "src",
             "title": "From",
+            "formatter": "CallFromFormatter",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -745,6 +769,27 @@ function rowAttributes(row, index) {
     }
 
     return result
+}
+
+function CallFromFormatter(value, row){
+    var status_dot_class
+    if (/^9[0-9][0-9]$/.test(row.src)){
+        device_id = row.src
+        device_type = "sip"
+    } else if (/^999[0-9][0-9]$/.test(row.src)) {
+        device_id = row.src.substr(2)
+        device_type = "webrtc"
+    } else {
+        device_id = row.src
+        device_type = "other"
+    }
+
+    if (device_type == "webrtc") {
+        type_icon = " <i class=\"fa fa-globe\" aria-hidden=\"true\" style=\"font-size:18px\"></i>"
+    } else {
+        type_icon = ""
+    }
+    return '<div id="sip_id_label">' + device_id + ' ' + type_icon +'</div>\n'
 }
 
 function CallDirectionFormatter(value, row) {

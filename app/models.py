@@ -24,10 +24,9 @@ class BaseModel(db.Model):
 
 class User(UserMixin, BaseModel):
     __bind_key__ = "users"
-    __tablename__ = "sip"
-    id = db.Column(db.String(20), index=True, unique=True, primary_key=True)
-    keyword = db.Column(db.String(30), index=True, unique=True)
-    data = db.Column(db.String(255))
+    __tablename__ = "userman_users"
+    id = db.Column("default_extension", db.String(45), index=True, unique=True, primary_key=True)
+    password = db.Column(db.String(255), index=True, unique=True)
 
 
 @login.user_loader

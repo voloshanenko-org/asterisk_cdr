@@ -7,6 +7,7 @@ import json
 import re
 import timeout_decorator
 import time
+import bcrypt
 from app import app
 from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.sql.sqltypes import String, DateTime, NullType
@@ -45,16 +46,21 @@ class LiteralDialect(DefaultDialect):
 def check_user_credentials(username, password):
     try:
         user = User.query\
-            .filter(User.keyword == "secret")\
             .filter(User.id == username)\
             .first()
     except exc.OperationalError as e:
         return None, False
 
-    if user is None or not user.data == password:
+    if user is None or not check_password_hash(password, user.password):
         return None, False
     else:
         return user, True
+
+
+def check_password_hash(password, password_hash):
+    passw = password.encode('utf-8')
+    passw_hash = password_hash.encode('utf-8')
+    return bcrypt.hashpw(passw, passw_hash) == passw_hash
 
 
 def raw_calldata(date_start, date_end):

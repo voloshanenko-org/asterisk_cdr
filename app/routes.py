@@ -119,7 +119,7 @@ def sip_status_response():
 
     if "error" in sip_status and "status" in webrtc_status:
         final_status = webrtc_status
-    elif "error" in sip_status and "status" in webrtc_status:
+    elif "error" in webrtc_status and "status" in sip_status:
         final_status = sip_status
     elif "error" in sip_status and "error" in webrtc_status:
         final_status = sip_status

@@ -112,10 +112,20 @@ def init_call_response():
 @login_required
 def sip_status_response():
     sip_user = current_user.id
+    webrtc_user = "99" + sip_user
+    final_status = ""
     sip_status = aster.get_sip_status(sip_user)
+    webrtc_status = aster.get_sip_status(webrtc_user)
 
-    response=Response(sip_status,content_type='application/json; charset=utf-8')
-    response.headers.add('content-length',len(sip_status))
+    if "error" in sip_status and "status" in webrtc_status:
+        final_status = webrtc_status
+    elif "error" in sip_status and "status" in webrtc_status:
+        final_status = sip_status
+    elif "error" in sip_status and "error" in webrtc_status:
+        final_status = sip_status
+
+    response=Response(final_status,content_type='application/json; charset=utf-8')
+    response.headers.add('content-length',len(final_status))
     response.status_code=200
 
     return response

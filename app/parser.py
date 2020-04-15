@@ -42,7 +42,7 @@ class LiteralDialect(DefaultDialect):
 
 
 # Limit time for connection Error
-@timeout_decorator.timeout(3, use_signals=False, timeout_exception=ConnectionError)
+@timeout_decorator.timeout(5, use_signals=False, timeout_exception=ConnectionError)
 def check_user_credentials(username, password):
     try:
         user = User.query\
@@ -298,6 +298,18 @@ def calldata_json(date_start, date_end):
 
                 if DEBUG:
                     print(linked_id)
+
+                if call_data["direction"] == "Outgoing":
+                    if "dst" in call_data:
+                        dst_extension_search = re.search('^9?9?[0-9][0-9][0-9]$', call_data["dst"], re.IGNORECASE)
+                        if dst_extension_search:
+                            call_data["direction"] = "Incoming"
+
+                    if "src" in call_data:
+                        src_extension_search = re.search('^9?9?[0-9][0-9][0-9]$', call_data["src"], re.IGNORECASE)
+                        if not src_extension_search:
+                            call_data["direction"] = "Incoming"
+
 
                 final_data.append(call_data)
 

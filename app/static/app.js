@@ -358,7 +358,7 @@ function updateTable(important_records, all_records, my_records){
         {
             "field": "src",
             "title": "From",
-            "formatter": "CallFromFormatter",
+            "formatter": "CallSrcFormatter",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -366,6 +366,7 @@ function updateTable(important_records, all_records, my_records){
         {
             "field": "dst",
             "title": "To",
+            "formatter": "CallDstFormatter",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -414,7 +415,7 @@ function updateTable(important_records, all_records, my_records){
         {
             "field": "src",
             "title": "From",
-            "formatter": "CallFromFormatter",
+            "formatter": "CallSrcFormatter",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -422,6 +423,7 @@ function updateTable(important_records, all_records, my_records){
         {
             "field": "dst",
             "title": "To",
+            "formatter": "CallDstFormatter",
             "halign": "center",
             "align": "center",
             "sortable": true
@@ -771,25 +773,48 @@ function rowAttributes(row, index) {
     return result
 }
 
-function CallFromFormatter(value, row){
-    var status_dot_class
-    if (/^9[0-9][0-9]$/.test(row.src)){
-        device_id = row.src
-        device_type = "sip"
-    } else if (/^999[0-9][0-9]$/.test(row.src)) {
-        device_id = row.src.substr(2)
-        device_type = "webrtc"
-    } else {
-        device_id = row.src
-        device_type = "other"
-    }
+function CallSrcFormatter(value, row){
+    if (typeof(row.src) != "undefined"){
+        if (/^9[0-9][0-9]$/.test(row.src)){
+            device_id = row.src
+            device_type = "sip"
+        } else if (/^999[0-9][0-9]$/.test(row.src)) {
+            device_id = row.src.substr(2)
+            device_type = "webrtc"
+        } else {
+            device_id = row.src
+            device_type = "other"
+        }
 
-    if (device_type == "webrtc") {
-        type_icon = " <i class=\"fa fa-globe\" aria-hidden=\"true\" style=\"font-size:18px\"></i>"
-    } else {
-        type_icon = ""
+        if (device_type == "webrtc") {
+            type_icon = " <i class=\"fa fa-globe\" aria-hidden=\"true\" style=\"font-size:18px\"></i>"
+        } else {
+            type_icon = ""
+        }
+        return '<div id="sip_id_label">' + device_id + ' ' + type_icon +'</div>\n'
     }
-    return '<div id="sip_id_label">' + device_id + ' ' + type_icon +'</div>\n'
+}
+
+function CallDstFormatter(value, row){
+    if (typeof(row.dst) != "undefined") {
+        if (/^9[0-9][0-9]$/.test(row.dst)){
+            device_id = row.dst
+            device_type = "sip"
+        } else if (/^999[0-9][0-9]$/.test(row.dst)) {
+            device_id = row.dst.substr(2)
+            device_type = "webrtc"
+        } else {
+            device_id = row.dst
+            device_type = "other"
+        }
+
+        if (device_type == "webrtc") {
+            type_icon = " <i class=\"fa fa-globe\" aria-hidden=\"true\" style=\"font-size:18px\"></i>"
+        } else {
+            type_icon = ""
+        }
+        return '<div id="sip_id_label">' + device_id + ' ' + type_icon +'</div>\n'
+    }
 }
 
 function CallDirectionFormatter(value, row) {

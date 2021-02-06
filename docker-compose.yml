@@ -1,7 +1,7 @@
 version: '2'
 services:
   web:
-    build: .
+    image: docker.voloshanenko.com/asterisk_cdr 
     restart: unless-stopped
     environment:
     - DB_HOST=${DB_HOST}

@@ -252,7 +252,7 @@ def calldata_json(date_start, date_end):
                     print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
                     raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
 
-            if call_data:
+            if call_data and len(call_data) > 1:
                 table_call_status = None
                 if call_status == "ANSWER":
                     table_call_status = "ANSWERED"

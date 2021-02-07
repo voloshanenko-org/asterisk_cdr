@@ -22,4 +22,4 @@ RUN apk add --update --no-cache libstdc++ mariadb-connector-c-dev \
 
 COPY . /app
 
-CMD ["python", "app.py"]
+CMD ["python", "./app.py"]

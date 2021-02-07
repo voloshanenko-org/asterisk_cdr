@@ -3,7 +3,6 @@ services:
   web:
     image: docker.voloshanenko.com/asterisk_cdr 
     restart: unless-stopped
-    command: ["python", "app.py"]
     environment:
     - DB_HOST=${DB_HOST}
     - DB_NAME_CDR=${DB_NAME_CDR}

@@ -13,6 +13,7 @@ RUN apk add --update --no-cache libstdc++ mariadb-connector-c-dev \
 	&& apk add --no-cache --virtual .build-deps \
 		mariadb-dev \
 		gcc \
+                g++ \
 		musl-dev \
                 openssl-dev \
                 libffi-dev \

@@ -14,18 +14,21 @@ function checkAllOperatorsSipStatus() {
         // Schedule next sip_status check in 20 seconds
         setTimeout(checkAllOperatorsSipStatus, 20*1000);
 
-        var external_sip_lines_status = data.filter(function(item) {
-            return /8[0-9][0-9]/.test(item["id"]) || /Telegroup/.test(item["id"]);
-        }).sort(function(a, b) {
-            return a.id - b.id;
-        });
-        var internal_sip_agents_status = data.filter(function(item) {
-            return item["device_state"] != "Unavailable" && /9[0-9][0-9]/.test(item["id"]);
-        }).sort(function(a, b) {
-            return a.id - b.id;
-        });
+        if (!"error" in data){
+            var external_sip_lines_status = data.filter(function(item) {
+                return /8[0-9][0-9]/.test(item["id"]) || /Telegroup/.test(item["id"]);
+            }).sort(function(a, b) {
+                return a.id - b.id;
+            });
+            var internal_sip_agents_status = data.filter(function(item) {
+                return item["device_state"] != "Unavailable" && /9[0-9][0-9]/.test(item["id"]);
+            }).sort(function(a, b) {
+                return a.id - b.id;
+            });
 
-        updateSipstatusTable(external_sip_lines_status, internal_sip_agents_status)
+            updateSipstatusTable(external_sip_lines_status, internal_sip_agents_status);
+        }
+
     }).fail(function(data){
         if (data.status != 500){
             window.location.replace("/login");

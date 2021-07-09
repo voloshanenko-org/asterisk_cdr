@@ -14,7 +14,7 @@ function checkAllOperatorsSipStatus() {
         // Schedule next sip_status check in 20 seconds
         setTimeout(checkAllOperatorsSipStatus, 20*1000);
 
-        if (!"error" in data){
+        if (!("error" in data)){
             var external_sip_lines_status = data.filter(function(item) {
                 return /8[0-9][0-9]/.test(item["id"]) || /Telegroup/.test(item["id"]);
             }).sort(function(a, b) {

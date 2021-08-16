@@ -329,7 +329,7 @@ def calldata_json(date_start, date_end):
         #Find if missed call was recalled
         for idx, call in enumerate(final_data):
             if call['direction'] == "Incoming" and call["disposition"] == "MISSED":
-                callback = list(filter(lambda d: d['dst'] in call['src'] and d['calldate'] > call['calldate'], outcoming_calls))
+                callback = list(filter(lambda d: "src" in call and d['dst'] in call['src'] and d['calldate'] > call['calldate'], outcoming_calls))
                 if callback:
                     final_data[idx]["callback"] = {
                         "linkedid": callback[0]['linkedid'],

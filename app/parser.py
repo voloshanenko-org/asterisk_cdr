@@ -67,7 +67,7 @@ def raw_calldata(date_start, date_end):
     try:
         DEBUG = app.config["FLASK_DEBUG"]
 
-        if DEBUG:
+        if DEBUG == "1":
             start_time = time.time()
 
         # Get uniq linkedid for calls
@@ -126,12 +126,12 @@ def raw_calldata(date_start, date_end):
     except exc.OperationalError as e:
         raise
 
-    if DEBUG:
+    if DEBUG == "1":
         start_time = time.time()
 
     grouped_calls_data = {k:list(v) for k,v in groupby(cels,key=itemgetter("linkedid"))}
 
-    if DEBUG:
+    if DEBUG == "1":
         print("--- Data grouping execution time %s seconds ---" % (time.time() - start_time))
 
     return grouped_calls_data
@@ -143,7 +143,7 @@ def calldata_json(date_start, date_end):
         grouped_cels_data = raw_calldata(date_start, date_end)
 
         DEBUG = app.config["FLASK_DEBUG"]
-        if DEBUG:
+        if DEBUG == "1":
             start_time = time.time()
 
         final_data = []
@@ -296,7 +296,7 @@ def calldata_json(date_start, date_end):
                     call_data.setdefault("disposition", "Incall")
                     call_data.setdefault("src", temp_num)
 
-                if DEBUG:
+                if DEBUG == "1":
                     print(linked_id)
 
                 if call_data["direction"] == "Outgoing":
@@ -313,7 +313,7 @@ def calldata_json(date_start, date_end):
 
                 final_data.append(call_data)
 
-        if DEBUG:
+        if DEBUG == "1":
             print("--- Initial data parsing execution time %s seconds ---" % (time.time() - start_time))
             start_time = time.time()
 
@@ -356,7 +356,7 @@ def calldata_json(date_start, date_end):
                         missed_calls_array.append(missed_data)
                     final_data[idx]["missed"] = missed_calls_array
 
-        if DEBUG:
+        if DEBUG == "1":
             print("--- Final data parsing execution time %s seconds ---" % (time.time() - start_time))
 
     except exc.OperationalError as e:

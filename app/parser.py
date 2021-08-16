@@ -342,9 +342,10 @@ def calldata_json(date_start, date_end):
         #Add information about missed calls to outgoing
         for idx, call in enumerate(final_data):
             if call['direction'] == "Outgoing" and call['disposition'] == "ANSWERED":
-                missed_calls = list(filter(lambda d: call['dst'] in d['src']
-                                               and d['calldate'] < call['calldate']
-                                               and d['callback']['linkedid'] == call['linkedid'] , incoming_missed_callback_calls))
+                missed_calls = list(filter(lambda d: "src" in call 
+                                                and call['dst'] in d['src']
+                                                and d['calldate'] < call['calldate']
+                                                and d['callback']['linkedid'] == call['linkedid'] , incoming_missed_callback_calls))
                 if missed_calls:
                     missed_calls_array = []
                     for missed_call in missed_calls:

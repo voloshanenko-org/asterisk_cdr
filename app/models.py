@@ -15,8 +15,7 @@ class BaseModel(db.Model):
         return [m.serialize_me() for m in l]
 
     def serialize(self):
-        d = self.serialize_me(self)
-        return d
+        return self.serialize_me(self)
 
     def __getitem__(self, key):
         return getattr(self, key)

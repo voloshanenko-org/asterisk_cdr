@@ -86,8 +86,9 @@ def main():
             name=portainer_stack_name,
             repository_url=git_url,
             compose_file_path_in_repository="docker-compose.yml",
-            env=stack_env_dict if stack_env_dict else ""
+            env=stack_env_dict or "",
         )
+
         stacks_api.stack_create(type=2, method='repository', body=stack_create_request, endpoint_id=endpoint_id)
 
 

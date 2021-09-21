@@ -81,10 +81,7 @@ def raw_calldata(date_start, date_end):
 
         linkedid_data = linkedid_query.all()
 
-        linkedid_data_filtered = []
-        for l in linkedid_data:
-            linkedid_data_filtered.append(l.linkedid.replace("'", ""))
-
+        linkedid_data_filtered = [l.linkedid.replace("'", "") for l in linkedid_data]
         if DEBUG == "1":
             statement = linkedid_query.statement
             raw_text_sql=statement.compile(
@@ -205,7 +202,7 @@ def calldata_json(date_start, date_end):
                     talk_start = event["eventtime"]
                     src_extension_search = re.search('Call_to_(.*)', event["cid_num"], re.IGNORECASE)
                     if not src_extension_search:
-                        if not event["context"] == "macro-dialout-trunk":
+                        if event["context"] != "macro-dialout-trunk":
                             call_data.setdefault("src", event["cid_num"])
                         # if incoming call answered - set by whom below
                         if event["context"] == "macro-dial-one":
@@ -217,10 +214,12 @@ def calldata_json(date_start, date_end):
                             if dst_extension_search:
                                 call_data.setdefault("dst", dst_extension_search.group(1))
 
-                # If end of the call
                 elif event["eventtype"] == "HANGUP":
                     # Set call_end data
-                    if event["appdata"] == "(Outgoing Line)" and not "src" in call_data:
+                    if (
+                        event["appdata"] == "(Outgoing Line)"
+                        and "src" not in call_data
+                    ):
                         call_extra_data = json.loads(event["extra"])
                         src_extension_search = re.search('PJSIP/(.*)-.*', call_extra_data["hangupsource"], re.IGNORECASE)
                         if src_extension_search:
@@ -235,19 +234,15 @@ def calldata_json(date_start, date_end):
                             temp_dst_num = dst_extension_search.group(1)
                         call_data["direction"] = "Outgoing"
 
-                        call_end = event["eventtime"]
-                        call_extra_data = json.loads(event["extra"])
-                        call_status = call_extra_data["dialstatus"]
-                    else:
-                        if event["context"] == "ext-queues" or event["context"] == "from-pstn":
-                            # Set src/dst for incoming missed call
-                            call_data.setdefault("src", event["cid_num"])
-                        elif event["context"] == "ext-local":
-                            call_data["direction"] = "Internal"
+                    elif event["context"] in ["ext-queues", "from-pstn"]:
+                        # Set src/dst for incoming missed call
+                        call_data.setdefault("src", event["cid_num"])
+                    elif event["context"] == "ext-local":
+                        call_data["direction"] = "Internal"
 
-                        call_end = event["eventtime"]
-                        call_extra_data = json.loads(event["extra"])
-                        call_status = call_extra_data["dialstatus"]
+                    call_end = event["eventtime"]
+                    call_extra_data = json.loads(event["extra"])
+                    call_status = call_extra_data["dialstatus"]
                 else:
                     print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
                     raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Unknown call eventtype: " + event["eventtype"])
@@ -265,23 +260,26 @@ def calldata_json(date_start, date_end):
                     table_call_status = call_status
                 call_data.setdefault("disposition", table_call_status)
 
-                if not "dst" in call_data and call_data["direction"] == "Outgoing" and temp_dst_num:
+                if (
+                    "dst" not in call_data
+                    and call_data["direction"] == "Outgoing"
+                    and temp_dst_num
+                ):
                     if "src" in call_data:
                         call_data["dst"] = temp_dst_num
                     else:
                         continue
 
                 if not call_start:
-                    if "src" in call_data or "dst" in call_data:
-                        if call_data["direction"] == "Outgoing" and temp_start_date:
-                            call_data.setdefault("calldate", temp_start_date)
-                            call_start = temp_start_date
-                        else:
-                            print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
-                            raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
-                    else:
+                    if "src" not in call_data and "dst" not in call_data:
                         continue
 
+                    if call_data["direction"] == "Outgoing" and temp_start_date:
+                        call_data.setdefault("calldate", temp_start_date)
+                        call_start = temp_start_date
+                    else:
+                        print("ValueError.\nLinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
+                        raise ValueError("ValueError. LinkedID:" + str(call_data["linkedid"]) + ", Start: " + str(call_start))
                 if call_end:
                     if talk_start:
                         call_data.setdefault("waiting_duration",(talk_start - call_start).seconds)
@@ -323,7 +321,7 @@ def calldata_json(date_start, date_end):
                 src_tel = re.search('38(.*)', call["src"], re.IGNORECASE)
                 if src_tel:
                     final_data[idx]["src"] = src_tel.group(1)
-                
+
 
         outcoming_calls=list(filter(lambda d: d['direction'] != "Incoming" and d['disposition'] == "ANSWERED", final_data))
         #Find if missed call was recalled

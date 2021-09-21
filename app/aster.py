@@ -79,7 +79,7 @@ def get_sip_status(sip_extension):
             else:
                 return '{"status": "' + sip_status + '"}'
 
-    if not random_id not in GLOBAL_SIP_STATUS_TABLE:
+    if random_id in GLOBAL_SIP_STATUS_TABLE:
         ami_client.logoff()
         return '{"error": "SIP_STATUS_TIMEOUT"}'
 
@@ -109,9 +109,7 @@ def get_all_sip_status():
         if random_id in GLOBAL_SIP_STATUS_TABLE and any("status" in d for d in GLOBAL_SIP_STATUS_TABLE[random_id]):
             ami_client.logoff()
             all_sip_data = GLOBAL_SIP_STATUS_TABLE[random_id]
-            final_sip_status = []
-            for sip_data in all_sip_data:
-                final_sip_status.append(sip_data)
+            final_sip_status = [sip_data for sip_data in all_sip_data]
             GLOBAL_SIP_STATUS_TABLE.pop(random_id)
             return final_sip_status
         else:
@@ -125,14 +123,14 @@ def get_all_sip_status():
 
 def event_listener(event,**kwargs):
 
+    if event == "EndpointDetailComplete":
+        return
     if event.name == "EndpointDetail":
         GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]] = { event.keys["ObjectName"] : event["DeviceState"] }
-    elif event == "EndpointDetailComplete":
-        pass
     elif event.name == "EndpointList":
-        if not event.keys["ActionID"] in GLOBAL_SIP_STATUS_TABLE:
+        if event.keys["ActionID"] not in GLOBAL_SIP_STATUS_TABLE:
             GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]] = []
-        if not event.keys["ObjectName"] == "anonymous":
+        if event.keys["ObjectName"] != "anonymous":
             GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]].append({ "id": event.keys["ObjectName"], "device_state" : event["DeviceState"] })
     elif event.name == "EndpointListComplete":
         GLOBAL_SIP_STATUS_TABLE[event.keys["ActionID"]].append({ "status" : event["EventList"] })

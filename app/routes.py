@@ -119,11 +119,13 @@ def sip_status_response():
 
     if "error" in sip_status and "status" in webrtc_status:
         final_status = webrtc_status
-    elif "error" in webrtc_status and "status" in sip_status:
+    elif (
+        "error" in webrtc_status
+        and "status" in sip_status
+        or "error" in sip_status
+        and "error" in webrtc_status
+    ):
         final_status = sip_status
-    elif "error" in sip_status and "error" in webrtc_status:
-        final_status = sip_status
-
     response=Response(final_status,content_type='application/json; charset=utf-8')
     response.headers.add('content-length',len(final_status))
     response.status_code=200
@@ -148,5 +150,4 @@ def all_sip_status_response():
 @login_required
 def get_record_file():
     record_hash = request.args.get("record_file_id")
-    response = ""
-    return response
+    return ""

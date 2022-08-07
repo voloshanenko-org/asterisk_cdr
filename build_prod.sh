@@ -1,6 +1,7 @@
 #! /bin/bash
+set -e
+
 source env.prod
-docker build -t asterisk_cdr .
-docker tag asterisk_cdr ${DOCKER_REGISTRY}/asterisk_cdr:latest
-docker push ${DOCKER_REGISTRY}/asterisk_cdr:latest
-python deploy/deploy.py
+docker buildx build --push --platform linux/amd64,linux/arm64 --output=type=image,push=true --tag ${DOCKER_REGISTRY}/asterisk_cdr:latest .
+pip3 install -r deploy/requirements.txt
+python3 deploy/deploy.py

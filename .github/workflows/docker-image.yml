@@ -1,0 +1,65 @@
+name: Docker Image CI
+
+on:
+  push:
+    branches: [ "main" ]
+
+jobs:
+  asterisk_cdr:
+    runs-on: ubuntu-latest
+    steps:
+      - 
+        name: Checkout
+        uses: actions/checkout@v3
+      - 
+        name: Set up Docker Buildx
+        id: buildx
+        uses: docker/setup-buildx-action@v2
+      - 
+        name: Inspect builder
+        run: |
+          echo "Name:      ${{ steps.buildx.outputs.name }}"
+          echo "Endpoint:  ${{ steps.buildx.outputs.endpoint }}"
+          echo "Status:    ${{ steps.buildx.outputs.status }}"
+          echo "Flags:     ${{ steps.buildx.outputs.flags }}"
+          echo "Platforms: ${{ steps.buildx.outputs.platforms }}"
+      - 
+        name: Login to private Docker registry
+        uses: docker/login-action@v2
+        with:
+          registry: ${{ secrets.DOCKER_REGISTRY_URL }}
+          username: ${{ secrets.DOCKER_REGISTRY_USERNAME }}
+          password: ${{ secrets.DOCKER_REGISTRY_PASSWORD }}
+      - 
+        name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          platforms: linux/amd64
+          push: true
+          tags: ${{ secrets.DOCKER_REGISTRY_URL }}/asterisk_cdr:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_REGISTRY_URL }}/asterisk_cdr:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_REGISTRY_URL }}/asterisk_cdr:buildcache,mode=max
+      - 
+        name: Deploy application
+        env:
+          VIRTUAL_HOST: ${{ secrets.VIRTUAL_HOST }}
+          VIRTUAL_PORT: ${{ secrets.VIRTUAL_PORT }}
+          ASTERISK_AMI_PASSWORD: ${{ secrets.ASTERISK_AMI_PASSWORD }}
+          ASTERISK_AMI_USERNAME: ${{ secrets.ASTERISK_AMI_USERNAME }}
+          ASTERISK_HOST: ${{ secrets.ASTERISK_HOST }}
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_NAME_CDR: ${{ secrets.DB_NAME_CDR }}
+          DB_NAME_USERS: ${{ secrets.DB_NAME_USERS }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          LETSENCRYPT_HOST: ${{ secrets.VIRTUAL_HOST }}
+          LETSENCRYPT_EMAIL: ${{ secrets.LETSENCRYPT_EMAIL }}
+          PORTAINER_HOST: ${{ secrets.PORTAINER_HOST }}
+          PORTAINER_USERNAME: ${{ secrets.PORTAINER_USERNAME }}
+          PORTAINER_PASSWORD: ${{ secrets.PORTAINER_PASSWORD }}
+          PORTAINER_STACK_NAME: ${{ secrets.PORTAINER_STACK_NAME }}
+          PYTHONUNBUFFERED: 1
+        run: |
+          pip3 install -r deploy/requirements.txt
+          python3 deploy/deploy.py

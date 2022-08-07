@@ -1,26 +1,15 @@
-FROM python:3.7-alpine
+FROM python:3.10-slim-buster
 
 EXPOSE 5000
 
-RUN pip install --upgrade pip
+COPY  requirements.txt /requirements.txt
+RUN apt update && \
+    apt install -y gcc libmariadbclient-dev && \
+    pip3 install --no-cache-dir -r requirements.txt && \
+    apt purge -y gcc libmariadbclient-dev && \
+    apt autoremove -y
+COPY app.py config.py app/
+COPY app app/app
 
-RUN mkdir /app
-WORKDIR /app
-
-COPY requirements.txt /app/requirements.txt
-
-RUN apk add --update --no-cache libstdc++ mariadb-connector-c-dev \
-	&& apk add --no-cache --virtual .build-deps \
-		mariadb-dev \
-		gcc \
-                g++ \
-		musl-dev \
-                openssl-dev \
-                libffi-dev \
-	&& pip install mysqlclient \
-        && pip install -r requirements.txt \
-	&& apk del .build-deps
-
-COPY . /app
-
-CMD ["python", "app.py"]
+WORKDIR app/
+CMD ["python3", "app.py"]
